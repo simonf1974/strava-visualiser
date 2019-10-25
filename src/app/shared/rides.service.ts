@@ -21,8 +21,11 @@ export class RidesService {
   getData() {
     // return this.firestore.collection("rides").snapshotChanges();
 
-    return this.firestore
-      .collection("rides", ref => ref.where("athleteid", "==", "1253381"))
-      .snapshotChanges();
+    return (
+      this.firestore
+        .collection("rides", ref => ref.where("athleteid", "==", 1253381))
+        // .collection("rides")
+        .valueChanges()
+    );
   }
 }

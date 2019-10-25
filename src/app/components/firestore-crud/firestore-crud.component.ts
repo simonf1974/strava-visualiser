@@ -140,7 +140,11 @@ export class FirestoreCrudComponent implements OnInit {
   };
 
   addData() {
-    this.ridesService.addData("leaderboards", "2852137_1253381", this.leaderBoard);
+    this.ridesService.addData(
+      "leaderboards",
+      "2852137_1253381",
+      this.leaderBoard
+    );
   }
 
   getData() {
@@ -150,8 +154,9 @@ export class FirestoreCrudComponent implements OnInit {
     this.ridesService.getData().subscribe(data => {
       console.log(data);
       data.forEach(e => {
-        console.log(e.payload.doc.id);
-        console.log(e.payload.doc.data());
+        console.log(e);
+        // console.log(e.payload.doc.id);
+        // console.log(e.payload.doc.data());
       });
     });
   }
