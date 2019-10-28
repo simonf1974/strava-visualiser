@@ -143,17 +143,21 @@ export class FirestoreCrudComponent implements OnInit {
     this.ridesService.addData("leaderboards", "2852137_1253381", this.leaderBoard);
   }
 
-  getData() {
-    this.rides = this.ridesService.getData();
-    console.log(this.rides);
+  // getData() {
+  //   this.rides = this.ridesService.getData();
+  //   console.log(this.rides);
 
-    this.ridesService.getData().subscribe(data => {
-      console.log(data);
-      data.forEach(e => {
-        console.log(e.payload.doc.id);
-        console.log(e.payload.doc.data());
-      });
-    });
+  //   this.ridesService.getData().subscribe(data => {
+  //     console.log(data);
+  //     data.forEach(e => {
+  //       console.log(e.payload.doc.id);
+  //       console.log(e.payload.doc.data());
+  //     });
+  //   });
+  // }
+
+  startStravaStuff() {
+    this.ridesService.startStravaStuff();
   }
 
   ngOnInit() {}

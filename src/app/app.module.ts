@@ -10,12 +10,14 @@ import { RidesService } from "./shared/rides.service";
 import { environment } from "src/environments/environment";
 import { AngularFireModule } from "@angular/fire";
 import { AngularFirestoreModule } from "@angular/fire/firestore";
-import { FirestoreCrudComponent } from './components/firestore-crud/firestore-crud.component';
+import { FirestoreCrudComponent } from "./components/firestore-crud/firestore-crud.component";
+import { HttpClientModule } from "@angular/common/http";
 
 @NgModule({
   declarations: [AppComponent, GraphComponent, FirestoreCrudComponent],
   imports: [
     BrowserModule,
+    HttpClientModule,
     AppRoutingModule,
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFirestoreModule
