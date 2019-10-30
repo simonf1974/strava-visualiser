@@ -1,48 +1,69 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import { Observable, BehaviorSubject } from "rxjs";
 
 @Injectable({
   providedIn: "root"
 })
 export class RidesService {
-  constructor(private firestore: AngularFirestore, private http: HttpClient) {}
+  _calls = {
+    numStravaApiCallsMade: 0,
+    numStravaApiCallsDone: 0,
+    numDbReadsMade: 0,
+    numDbReadsDone: 0,
+    numDbWritesMade: 0,
+    numDbWritesDone: 0
+  };
 
-  addData(collection, key, data) {
+  calls: BehaviorSubject<any>;
+
+  constructor(private firestore: AngularFirestore, private http: HttpClient) {
+    this.calls = new BehaviorSubject(this._calls);
+  }
+
+  incrementCount(call: string) {
+    this._calls[call] = ++this._calls[call];
+    this.calls.next(this._calls);
+  }
+
+  addData(collection: string, key: string, data) {
+    this.incrementCount("numDbWritesMade");
     return new Promise<any>((resolve, reject) => {
       this.firestore
         .collection(collection)
         .doc(key)
         .set(data)
-        .then(res => {}, err => reject(err));
+        .then(
+          res => {
+            this.incrementCount("numDbWritesDone");
+          },
+          err => reject(err)
+        );
     });
   }
 
-  getData() {
-    // return this.firestore.collection("rides").snapshotChanges();
-
+  getByKeyFromDb(collection: string, key: string) {
+    this.incrementCount("numDbReadsMade");
     return this.firestore
-      .collection("rides", ref => ref.where("athleteid", "==", "1253381"))
-      .snapshotChanges()
+      .collection(collection)
+      .doc(key.toString())
+      .get()
       .toPromise();
   }
 
-  getRideFromDb(id: number) {
-    return this.firestore.collection("rides", ref => ref.where("id", "==", id)).snapshotChanges();
-  }
-
   startStravaStuff() {
-    this.getStravaToken().subscribe(token => {
-      this.getStravaData(token.access_token, "activities", "&per_page=5").subscribe(rides => {
-        console.log(rides);
+    this.getStravaToken().then(token => {
+      this.getStravaData(token.access_token, "activities", "&per_page=5").then(rides => {
+        this.incrementCount("numStravaApiCallsDone");
         rides.forEach(ride => {
           if (ride.type === "Ride") {
-            console.log(ride.type);
-            this.getRideFromDb(ride.id).subscribe(rideFromDb => {
-              if (rideFromDb[0] === undefined) {
-                this.getStravaData(token.access_token, `activities/${ride.id}`, "").subscribe(
+            this.getByKeyFromDb("rides", ride.id).then(rideFromDb => {
+              this.incrementCount("numDbReadsDone");
+              if (rideFromDb.data() === undefined) {
+                this.getStravaData(token.access_token, `activities/${ride.id}`, "").then(
                   rideDetails => {
+                    this.incrementCount("numStravaApiCallsDone");
                     this.saveRideDetails(rideDetails);
                   }
                 );
@@ -55,8 +76,6 @@ export class RidesService {
   }
 
   saveRideDetails(rideDetails) {
-    console.log(rideDetails);
-    console.log(this.convertApiRidetoDbRide(rideDetails));
     this.addData("rides", rideDetails.id.toString(), this.convertApiRidetoDbRide(rideDetails));
   }
 
@@ -95,13 +114,14 @@ export class RidesService {
     };
   }
 
-  getStravaData(token, api, suffix): Observable<any> {
+  getStravaData(token: string, api: string, suffix: string): Promise<any> {
     const baseUrl = "https://www.strava.com/api/v3/";
     const fullUrl = `${baseUrl}${api}?access_token=${token}${suffix}`;
-    return this.http.get(fullUrl);
+    this.incrementCount("numStravaApiCallsMade");
+    return this.http.get(fullUrl).toPromise();
   }
 
-  getStravaToken(): Observable<any> {
+  getStravaToken(): Promise<any> {
     const url = "https://www.strava.com/oauth/token";
     const data = {
       client_id: "39755",
@@ -109,6 +129,6 @@ export class RidesService {
       code: "072cc35b6b4327aca112a1f9fb1f05709a167288",
       grant_type: "authorization_code"
     };
-    return this.http.post(url, data);
+    return this.http.post(url, data).toPromise();
   }
 }
