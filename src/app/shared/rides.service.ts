@@ -2,12 +2,13 @@ import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { HttpClient } from "@angular/common/http";
 import { BehaviorSubject } from "rxjs";
+import { firestore } from "firebase";
 
 @Injectable({
   providedIn: "root"
 })
 export class RidesService {
-  _calls = {
+  private _calls = {
     numStravaApiCallsMade: 0,
     numStravaApiCallsDone: 0,
     numDbReadsMade: 0,
@@ -15,11 +16,141 @@ export class RidesService {
     numDbWritesMade: 0,
     numDbWritesDone: 0
   };
-
   calls: BehaviorSubject<any>;
+
+  private batches: Map<number, [firestore.WriteBatch, number]> = new Map<
+    number,
+    [firestore.WriteBatch, number]
+  >();
 
   constructor(private firestore: AngularFirestore, private http: HttpClient) {
     this.calls = new BehaviorSubject(this._calls);
+  }
+
+  // Main logic for scraping Strava data and saving to database
+
+  scrapeStravaData() {
+    this.getStravaToken().then(token => {
+      this.getStravaData(token.access_token, "activities", "&per_page=5").then(
+        rides => {
+          rides.forEach(ride => {
+            if (ride.type === "Ride") {
+              this.getByKeyFromDb("rides", ride.id).then(rideFromDb => {
+                if (rideFromDb.data() === undefined) {
+                  this.getStravaData(
+                    token.access_token,
+                    `activities/${ride.id}`,
+                    ""
+                  ).then(rideDetails => {
+                    this.saveRideDetails(rideDetails);
+                  });
+                }
+              });
+            }
+          });
+        }
+      );
+    });
+  }
+
+  private saveRideDetails(rideDetails) {
+    const promises: Promise<firestore.DocumentSnapshot>[] = [];
+    rideDetails.segment_efforts.forEach(segEffort => {
+      promises.push(
+        this.getByKeyFromDb("segment_performance", [
+          segEffort.segment.id,
+          segEffort.athlete.id
+        ])
+      );
+    });
+
+    Promise.all(promises).then(res => {
+      this.startBatch(rideDetails.id);
+
+      this.addDataToBatch(
+        "rides",
+        rideDetails.id,
+        this.convertApiRideToDbFormat(rideDetails),
+        rideDetails.id
+      );
+
+      rideDetails.segment_efforts.forEach(segEffort => {
+        let segPerf;
+        res.forEach(segPerformance => {
+          const segPerfData = segPerformance.data();
+          if (
+            segPerfData !== undefined &&
+            segPerfData.segment_id === segEffort.segment.id
+          )
+            segPerf = segPerfData;
+        });
+
+        this.addDataToBatch(
+          "segment_performance",
+          [segEffort.segment.id, segEffort.athlete.id],
+          this.convertApiSegPerformanceToDbFormat(segEffort, segPerf),
+          rideDetails.id
+        );
+
+        this.addDataToBatch(
+          "segment_efforts",
+          segEffort.id,
+          this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id),
+          rideDetails.id
+        );
+      });
+
+      this.endBatch(rideDetails.id);
+    });
+  }
+
+  // Database access
+
+  private getByKeyFromDb(collection: string, key: number | number[]) {
+    this.incrementCount("numDbReadsMade");
+    return this.firestore
+      .collection(collection)
+      .doc(this.transformKeyToStore(key))
+      .get()
+      .toPromise()
+      .then(res => {
+        this.incrementCount("numDbReadsDone");
+        return res;
+      });
+  }
+
+  private startBatch(rideId: number) {
+    this.incrementCount("numDbWritesMade");
+    this.batches.set(rideId, [this.firestore.firestore.batch(), 0]);
+  }
+
+  private addDataToBatch(
+    collection: string,
+    key: number | number[],
+    data,
+    rideId: number
+  ) {
+    const itemRef = this.firestore
+      .collection(collection)
+      .doc(this.transformKeyToStore(key)).ref;
+
+    const batch = this.batches.get(rideId)[0];
+    let count: number = this.batches.get(rideId)[1];
+    this.batches.set(rideId, [batch, ++count]);
+
+    if (this.batches.get(rideId)[1] === 495) {
+      this.endBatch(rideId);
+      this.startBatch(rideId);
+    }
+    this.batches.get(rideId)[0].set(itemRef, data, { merge: true });
+  }
+
+  private endBatch(rideId: number) {
+    const batch = this.batches.get(rideId)[0];
+    batch.commit().then(res => {
+      this.incrementCount("numDbWritesDone");
+      this.batches.delete(rideId);
+    });
   }
 
   private incrementCount(call: string) {
@@ -37,75 +168,37 @@ export class RidesService {
     } else return key.toString();
   }
 
-  private addData(collection: string, key: number | number[], data) {
-    this.incrementCount("numDbWritesMade");
-    return new Promise<any>((resolve, reject) => {
-      this.firestore
-        .collection(collection)
-        .doc(this.transformKeyToStore(key))
-        .set(data, { merge: true })
-        .then(
-          res => {
-            this.incrementCount("numDbWritesDone");
-          },
-          err => reject(err)
-        );
-    });
+  //Strava API calls
+
+  private getStravaToken(): Promise<any> {
+    const url = "https://www.strava.com/oauth/token";
+    const data = {
+      client_id: "39755",
+      client_secret: "ab08660dcf7919ca0dac4111a8e1963aa9183c0d",
+      code: "072cc35b6b4327aca112a1f9fb1f05709a167288",
+      grant_type: "authorization_code"
+    };
+    return this.http.post(url, data).toPromise();
   }
 
-  private getByKeyFromDb(collection: string, key: number | number[]) {
-    this.incrementCount("numDbReadsMade");
-    return this.firestore
-      .collection(collection)
-      .doc(this.transformKeyToStore(key))
-      .get()
-      .toPromise();
-  }
-
-  startStravaStuff() {
-    this.getStravaToken().then(token => {
-      this.getStravaData(token.access_token, "activities", "&per_page=5").then(rides => {
+  private getStravaData(
+    token: string,
+    api: string,
+    suffix: string
+  ): Promise<any> {
+    const baseUrl = "https://www.strava.com/api/v3/";
+    const fullUrl = `${baseUrl}${api}?access_token=${token}${suffix}`;
+    this.incrementCount("numStravaApiCallsMade");
+    return this.http
+      .get(fullUrl)
+      .toPromise()
+      .then(res => {
         this.incrementCount("numStravaApiCallsDone");
-        rides.forEach(ride => {
-          if (ride.type === "Ride") {
-            this.getByKeyFromDb("rides", ride.id).then(rideFromDb => {
-              this.incrementCount("numDbReadsDone");
-              if (rideFromDb.data() === undefined) {
-                this.getStravaData(token.access_token, `activities/${ride.id}`, "").then(
-                  rideDetails => {
-                    this.incrementCount("numStravaApiCallsDone");
-                    this.saveRideDetails(rideDetails);
-                  }
-                );
-              }
-            });
-          }
-        });
+        return res;
       });
-    });
   }
 
-  private saveRideDetails(rideDetails) {
-    this.addData("rides", rideDetails.id, this.convertApiRideToDbFormat(rideDetails));
-    rideDetails.segment_efforts.forEach(segEffort => {
-      this.getByKeyFromDb("segment_performance", [segEffort.segment.id, segEffort.athlete.id]).then(
-        segPerformance => {
-          this.incrementCount("numDbReadsDone");
-          this.addData(
-            "segment_performance",
-            [segEffort.segment.id, segEffort.athlete.id],
-            this.convertApiSegPerformanceToDbFormat(segEffort, segPerformance.data())
-          );
-        }
-      );
-
-      this.addData(
-        "segment_efforts",
-        segEffort.id,
-        this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id)
-      );
-    });
-  }
+  //API to database mapping
 
   private convertApiSegEffortToDbFormat(segEffort, rideId: number) {
     return {
@@ -137,7 +230,10 @@ export class RidesService {
   }
 
   private getSegEffortLastRidden(segEffort, segPerformance): string {
-    if (segPerformance === undefined || segEffort.start_date > segPerformance.last_ridden_date)
+    if (
+      segPerformance === undefined ||
+      segEffort.start_date > segPerformance.last_ridden_date
+    )
       return segEffort.start_date;
     else return segPerformance.last_ridden_date;
   }
@@ -159,7 +255,10 @@ export class RidesService {
     return {
       last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
       num_times_ridden: this.getSegEffortNumTimesRidden(segPerformance),
-      requires_refresh: this.getSegEffortRequiresRefresh(segEffort, segPerformance),
+      requires_refresh: this.getSegEffortRequiresRefresh(
+        segEffort,
+        segPerformance
+      ),
       athlete_id: segEffort.athlete.id,
       segment_id: segEffort.segment.id,
       segment: {
@@ -211,23 +310,5 @@ export class RidesService {
       weighted_average_watts: rideDetails.weighted_average_watts,
       year: rideDetails.start_date.slice(0, 4)
     };
-  }
-
-  private getStravaData(token: string, api: string, suffix: string): Promise<any> {
-    const baseUrl = "https://www.strava.com/api/v3/";
-    const fullUrl = `${baseUrl}${api}?access_token=${token}${suffix}`;
-    this.incrementCount("numStravaApiCallsMade");
-    return this.http.get(fullUrl).toPromise();
-  }
-
-  private getStravaToken(): Promise<any> {
-    const url = "https://www.strava.com/oauth/token";
-    const data = {
-      client_id: "39755",
-      client_secret: "ab08660dcf7919ca0dac4111a8e1963aa9183c0d",
-      code: "072cc35b6b4327aca112a1f9fb1f05709a167288",
-      grant_type: "authorization_code"
-    };
-    return this.http.post(url, data).toPromise();
   }
 }
