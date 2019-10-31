@@ -22,17 +22,27 @@ export class RidesService {
     this.calls = new BehaviorSubject(this._calls);
   }
 
-  incrementCount(call: string) {
+  private incrementCount(call: string) {
     this._calls[call] = ++this._calls[call];
     this.calls.next(this._calls);
   }
 
-  addData(collection: string, key: string, data) {
+  private addData(collection: string, key, data) {
+    let keyToStore: string = "";
+    if (Array.isArray(key)) {
+      key.forEach(k => {
+        keyToStore = keyToStore + "_" + k;
+      });
+      keyToStore = keyToStore.substr(1);
+    } else {
+      keyToStore = key.toString();
+    }
+
     this.incrementCount("numDbWritesMade");
     return new Promise<any>((resolve, reject) => {
       this.firestore
         .collection(collection)
-        .doc(key)
+        .doc(keyToStore)
         .set(data)
         .then(
           res => {
@@ -43,7 +53,7 @@ export class RidesService {
     });
   }
 
-  getByKeyFromDb(collection: string, key: string) {
+  private getByKeyFromDb(collection: string, key: string) {
     this.incrementCount("numDbReadsMade");
     return this.firestore
       .collection(collection)
@@ -75,11 +85,29 @@ export class RidesService {
     });
   }
 
-  saveRideDetails(rideDetails) {
-    this.addData("rides", rideDetails.id.toString(), this.convertApiRideToDbFormat(rideDetails));
+  private saveRideDetails(rideDetails) {
+    //this.addData("rides", rideDetails.id, this.convertApiRideToDbFormat(rideDetails));
+    rideDetails.segment_efforts.forEach(segEffort => {
+      if (segEffort.segment.id === 18182020) {
+        console.log(this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id));
+        console.log(this.convertApiSegPerformanceToDbFormat(segEffort, undefined));
+
+        this.addData(
+          "segment_efforts",
+          segEffort.id,
+          this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id)
+        );
+
+        this.addData(
+          "segment_performance",
+          [segEffort.segment.id, segEffort.athlete.id],
+          this.convertApiSegPerformanceToDbFormat(segEffort, undefined)
+        );
+      }
+    });
   }
 
-  convertApiSegEffortToDbFormat(segEffort, rideId: number) {
+  private convertApiSegEffortToDbFormat(segEffort, rideId: number) {
     return {
       average_cadence: segEffort.average_cadence,
       average_watts: segEffort.average_watts,
@@ -108,23 +136,29 @@ export class RidesService {
     };
   }
 
-  getSegEffortLastRidden(segEffort, segPerformance): string {
-    if (segPerformance === undefined) return segEffort.start_date;
-    return;
+  private getSegEffortLastRidden(segEffort, segPerformance): string {
+    if (segPerformance === undefined || segEffort.start_date > segPerformance.last_ridden_date)
+      return segEffort.start_date;
+    else return segPerformance.last_ridden_date;
   }
 
-  getSegEffortNumTimesRidden(segEffort, segPerformance): number {
-    return;
+  private getSegEffortNumTimesRidden(segPerformance): number {
+    if (segPerformance === undefined) return 1;
+    else return ++segPerformance.num_times_ridden;
   }
 
-  getSegEffortRequiresRefresh(segEffort, segPerformance): boolean {
-    return;
+  private getSegEffortRequiresRefresh(segEffort, segPerformance): boolean {
+    return (
+      segPerformance === undefined ||
+      segPerformance.requires_refresh ||
+      segEffort.start_date > segPerformance.last_ridden_date
+    );
   }
 
-  convertApiSegPerformanceToDbFormat(segEffort, segPerformance) {
+  private convertApiSegPerformanceToDbFormat(segEffort, segPerformance) {
     return {
       last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
-      num_times_ridden: this.getSegEffortNumTimesRidden(segEffort, segPerformance),
+      num_times_ridden: this.getSegEffortNumTimesRidden(segPerformance),
       requires_refresh: this.getSegEffortRequiresRefresh(segEffort, segPerformance),
       athlete_id: segEffort.athlete.id,
       segment_id: segEffort.segment.id,
@@ -144,7 +178,7 @@ export class RidesService {
     };
   }
 
-  convertApiRideToDbFormat(rideDetails) {
+  private convertApiRideToDbFormat(rideDetails) {
     return {
       achievement_count: rideDetails.achievement_count,
       athlete_count: rideDetails.athlete_count,
@@ -179,14 +213,14 @@ export class RidesService {
     };
   }
 
-  getStravaData(token: string, api: string, suffix: string): Promise<any> {
+  private getStravaData(token: string, api: string, suffix: string): Promise<any> {
     const baseUrl = "https://www.strava.com/api/v3/";
     const fullUrl = `${baseUrl}${api}?access_token=${token}${suffix}`;
     this.incrementCount("numStravaApiCallsMade");
     return this.http.get(fullUrl).toPromise();
   }
 
-  getStravaToken(): Promise<any> {
+  private getStravaToken(): Promise<any> {
     const url = "https://www.strava.com/oauth/token";
     const data = {
       client_id: "39755",
