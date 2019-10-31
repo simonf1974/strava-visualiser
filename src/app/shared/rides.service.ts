@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { HttpClient } from "@angular/common/http";
-import { Observable, BehaviorSubject } from "rxjs";
+import { BehaviorSubject } from "rxjs";
 
 @Injectable({
   providedIn: "root"
@@ -27,23 +27,23 @@ export class RidesService {
     this.calls.next(this._calls);
   }
 
-  private addData(collection: string, key, data) {
-    let keyToStore: string = "";
+  private transformKeyToStore(key: number | number[]) {
     if (Array.isArray(key)) {
+      let keyToStore: string = "";
       key.forEach(k => {
         keyToStore = keyToStore + "_" + k;
       });
-      keyToStore = keyToStore.substr(1);
-    } else {
-      keyToStore = key.toString();
-    }
+      return keyToStore.substr(1);
+    } else return key.toString();
+  }
 
+  private addData(collection: string, key: number | number[], data) {
     this.incrementCount("numDbWritesMade");
     return new Promise<any>((resolve, reject) => {
       this.firestore
         .collection(collection)
-        .doc(keyToStore)
-        .set(data)
+        .doc(this.transformKeyToStore(key))
+        .set(data, { merge: true })
         .then(
           res => {
             this.incrementCount("numDbWritesDone");
@@ -53,11 +53,11 @@ export class RidesService {
     });
   }
 
-  private getByKeyFromDb(collection: string, key: string) {
+  private getByKeyFromDb(collection: string, key: number | number[]) {
     this.incrementCount("numDbReadsMade");
     return this.firestore
       .collection(collection)
-      .doc(key.toString())
+      .doc(this.transformKeyToStore(key))
       .get()
       .toPromise();
   }
@@ -86,24 +86,24 @@ export class RidesService {
   }
 
   private saveRideDetails(rideDetails) {
-    //this.addData("rides", rideDetails.id, this.convertApiRideToDbFormat(rideDetails));
+    this.addData("rides", rideDetails.id, this.convertApiRideToDbFormat(rideDetails));
     rideDetails.segment_efforts.forEach(segEffort => {
-      if (segEffort.segment.id === 18182020) {
-        console.log(this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id));
-        console.log(this.convertApiSegPerformanceToDbFormat(segEffort, undefined));
+      this.getByKeyFromDb("segment_performance", [segEffort.segment.id, segEffort.athlete.id]).then(
+        segPerformance => {
+          this.incrementCount("numDbReadsDone");
+          this.addData(
+            "segment_performance",
+            [segEffort.segment.id, segEffort.athlete.id],
+            this.convertApiSegPerformanceToDbFormat(segEffort, segPerformance.data())
+          );
+        }
+      );
 
-        this.addData(
-          "segment_efforts",
-          segEffort.id,
-          this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id)
-        );
-
-        this.addData(
-          "segment_performance",
-          [segEffort.segment.id, segEffort.athlete.id],
-          this.convertApiSegPerformanceToDbFormat(segEffort, undefined)
-        );
-      }
+      this.addData(
+        "segment_efforts",
+        segEffort.id,
+        this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id)
+      );
     });
   }
 
@@ -117,7 +117,7 @@ export class RidesService {
       moving_time: segEffort.moving_time,
       ride_id: rideId,
       althlete_id: segEffort.athlete.id,
-      segment_id: segEffort.segment_id,
+      segment_id: segEffort.segment.id,
       start_date: segEffort.start_date,
       start_date_local: segEffort.start_date_local,
       segment: {
