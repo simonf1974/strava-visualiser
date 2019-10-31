@@ -76,14 +76,79 @@ export class RidesService {
   }
 
   saveRideDetails(rideDetails) {
-    this.addData("rides", rideDetails.id.toString(), this.convertApiRidetoDbRide(rideDetails));
+    this.addData("rides", rideDetails.id.toString(), this.convertApiRideToDbFormat(rideDetails));
   }
 
-  convertApiRidetoDbRide(rideDetails) {
+  convertApiSegEffortToDbFormat(segEffort, rideId: number) {
+    return {
+      average_cadence: segEffort.average_cadence,
+      average_watts: segEffort.average_watts,
+      device_watts: segEffort.device_watts,
+      elapsed_time: segEffort.elapsed_time,
+      id: segEffort.id,
+      moving_time: segEffort.moving_time,
+      ride_id: rideId,
+      althlete_id: segEffort.athlete.id,
+      segment_id: segEffort.segment_id,
+      start_date: segEffort.start_date,
+      start_date_local: segEffort.start_date_local,
+      segment: {
+        average_grade: segEffort.segment.average_grade,
+        city: segEffort.segment.city,
+        climb_category: segEffort.segment.climb_category,
+        country: segEffort.segment.country,
+        distance: segEffort.segment.distance,
+        elevation_high: segEffort.segment.elevation_high,
+        elevation_low: segEffort.segment.elevation_low,
+        id: segEffort.segment.id,
+        maximum_grade: segEffort.segment.maximum_grade,
+        name: segEffort.segment.name,
+        state: segEffort.segment.state
+      }
+    };
+  }
+
+  getSegEffortLastRidden(segEffort, segPerformance): string {
+    if (segPerformance === undefined) return segEffort.start_date;
+    return;
+  }
+
+  getSegEffortNumTimesRidden(segEffort, segPerformance): number {
+    return;
+  }
+
+  getSegEffortRequiresRefresh(segEffort, segPerformance): boolean {
+    return;
+  }
+
+  convertApiSegPerformanceToDbFormat(segEffort, segPerformance) {
+    return {
+      last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
+      num_times_ridden: this.getSegEffortNumTimesRidden(segEffort, segPerformance),
+      requires_refresh: this.getSegEffortRequiresRefresh(segEffort, segPerformance),
+      athlete_id: segEffort.athlete.id,
+      segment_id: segEffort.segment.id,
+      segment: {
+        average_grade: segEffort.segment.average_grade,
+        city: segEffort.segment.city,
+        climb_category: segEffort.segment.climb_category,
+        country: segEffort.segment.country,
+        distance: segEffort.segment.distance,
+        elevation_high: segEffort.segment.elevation_high,
+        elevation_low: segEffort.segment.elevation_low,
+        id: segEffort.segment.id,
+        maximum_grade: segEffort.segment.maximum_grade,
+        name: segEffort.segment.name,
+        state: segEffort.segment.state
+      }
+    };
+  }
+
+  convertApiRideToDbFormat(rideDetails) {
     return {
       achievement_count: rideDetails.achievement_count,
       athlete_count: rideDetails.athlete_count,
-      athleteid: rideDetails.athlete.id,
+      athlete_id: rideDetails.athlete.id,
       average_cadence: rideDetails.average_cadence,
       average_speed: rideDetails.average_speed,
       average_temp: rideDetails.average_temp,
