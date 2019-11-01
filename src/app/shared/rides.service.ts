@@ -41,69 +41,6 @@ export class RidesService {
     });
   }
 
-  refreshPerformanceData() {
-    const maxCount = 1;
-    let count = 0;
-    this.getStravaToken().then(token => {
-      this.getPerformanceDataToRefresh().subscribe(perfData => {
-        this.incrementCount("numDbReadsDone");
-        perfData.forEach(segPerformance => {
-          console.log(segPerformance);
-          if (++count <= maxCount) {
-            this.getStravaData(
-              token.access_token,
-              `/segments/${segPerformance.segment_id}/leaderboard`,
-              "&following=true"
-            ).then(leaderboard => {
-              console.log(leaderboard);
-              this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
-            });
-          }
-        });
-      });
-    });
-  }
-
-  private applyLeaderboardToSegPerformance(segPerformance, leaderboard) {
-    // console.log(this.overlayLeaderboardOntoSegPerformance(leaderboard));
-    this.updateData(
-      "segment_performance",
-      [segPerformance.segment_id, segPerformance.athlete_id],
-      this.overlayLeaderboardOntoSegPerformance(leaderboard)
-    );
-  }
-
-  private overlayLeaderboardOntoSegPerformance(leaderboard) {
-    let mainEntry;
-    let peopleAbove: string[] = [];
-    let peopleBelow: string[] = [];
-
-    leaderboard.entries.forEach(entry => {
-      if (entry.athlete_name === "Simon F.") mainEntry = entry;
-      else if (mainEntry === undefined) {
-        peopleAbove.push(entry.athlete_name);
-      } else {
-        peopleBelow.push(entry.athlete_name);
-      }
-    });
-
-    return {
-      requires_refresh: false,
-      people_above: peopleAbove.join(", "),
-      people_below: peopleBelow.join(", "),
-      rank: mainEntry.rank,
-      pr_date: mainEntry.start_date,
-      pr_date_local: mainEntry.start_date_local,
-      pr_elapsed_time: mainEntry.elapsed_time,
-      pr_moving_time: mainEntry.moving_time,
-      top_date: leaderboard.entries[0].start_date,
-      top_date_local: leaderboard.entries[0].start_date_local,
-      top_elapsed_time: leaderboard.entries[0].elapsed_time,
-      top_moving_time: leaderboard.entries[0].moving_time,
-      entries: leaderboard.entries
-    };
-  }
-
   private processRide(ride, token) {
     this.getByKeyFromDb("rides", ride.id).then(rideFromDb => {
       if (rideFromDb.data() === undefined) {
@@ -157,6 +94,37 @@ export class RidesService {
 
       this.endBatch(rideDetails.id);
     });
+  }
+
+  // Logic to refesh perf data with leaderboards
+
+  refreshPerformanceData() {
+    const maxCount = 1;
+    let count = 0;
+    this.getStravaToken().then(token => {
+      this.getPerformanceDataToRefresh().subscribe(perfData => {
+        this.incrementCount("numDbReadsDone");
+        perfData.forEach(segPerformance => {
+          if (++count <= maxCount) {
+            this.getStravaData(
+              token.access_token,
+              `/segments/${segPerformance.segment_id}/leaderboard`,
+              "&following=true"
+            ).then(leaderboard => {
+              this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
+            });
+          }
+        });
+      });
+    });
+  }
+
+  private applyLeaderboardToSegPerformance(segPerformance, leaderboard) {
+    this.updateData(
+      "segment_performance",
+      [segPerformance.segment_id, segPerformance.athlete_id],
+      this.overlayLeaderboardOntoSegPerformance(leaderboard)
+    );
   }
 
   // Database access
@@ -376,6 +344,37 @@ export class RidesService {
       utc_offset: rideDetails.utc_offset,
       weighted_average_watts: rideDetails.weighted_average_watts,
       year: rideDetails.start_date.slice(0, 4)
+    };
+  }
+
+  private overlayLeaderboardOntoSegPerformance(leaderboard) {
+    let mainEntry;
+    let peopleAbove: string[] = [];
+    let peopleBelow: string[] = [];
+
+    leaderboard.entries.forEach(entry => {
+      if (entry.athlete_name === "Simon F.") mainEntry = entry;
+      else if (mainEntry === undefined) {
+        peopleAbove.push(entry.athlete_name);
+      } else {
+        peopleBelow.push(entry.athlete_name);
+      }
+    });
+
+    return {
+      requires_refresh: false,
+      people_above: peopleAbove.join(", "),
+      people_below: peopleBelow.join(", "),
+      rank: mainEntry.rank,
+      pr_date: mainEntry.start_date,
+      pr_date_local: mainEntry.start_date_local,
+      pr_elapsed_time: mainEntry.elapsed_time,
+      pr_moving_time: mainEntry.moving_time,
+      top_date: leaderboard.entries[0].start_date,
+      top_date_local: leaderboard.entries[0].start_date_local,
+      top_elapsed_time: leaderboard.entries[0].elapsed_time,
+      top_moving_time: leaderboard.entries[0].moving_time,
+      entries: leaderboard.entries
     };
   }
 }
