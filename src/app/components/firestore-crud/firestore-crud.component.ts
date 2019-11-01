@@ -11,8 +11,12 @@ export class FirestoreCrudComponent implements OnInit {
 
   constructor(private ridesService: RidesService) {}
 
-  startStravaStuff() {
+  scrapeStravaData() {
     this.ridesService.scrapeStravaData();
+  }
+
+  refreshPerformanceData() {
+    this.ridesService.refreshPerformanceData();
   }
 
   ngOnInit() {
