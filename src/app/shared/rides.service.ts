@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore } from "@angular/fire/firestore";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpResponse } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
 import { firestore } from "firebase";
 
@@ -14,7 +14,8 @@ export class RidesService {
     numDbReadsMade: 0,
     numDbReadsDone: 0,
     numDbWritesMade: 0,
-    numDbWritesDone: 0
+    numDbWritesDone: 0,
+    httpDetails: ""
   };
   calls: BehaviorSubject<any>;
 
@@ -32,11 +33,13 @@ export class RidesService {
   scrapeStravaData() {
     this.getStravaToken().then(token => {
       this.getStravaData(token.access_token, "activities", "&per_page=5").then(rides => {
-        rides.forEach(ride => {
-          if (ride.type === "Ride") {
-            this.processRide(ride, token);
-          }
-        });
+        if (rides !== null) {
+          rides.forEach(ride => {
+            if (ride.type === "Ride") {
+              this.processRide(ride, token);
+            }
+          });
+        }
       });
     });
   }
@@ -45,7 +48,7 @@ export class RidesService {
     this.getByKeyFromDb("rides", ride.id).then(rideFromDb => {
       if (rideFromDb.data() === undefined) {
         this.getStravaData(token.access_token, `activities/${ride.id}`, "").then(rideDetails => {
-          this.saveRideDetails(rideDetails);
+          if (rideDetails !== null) this.saveRideDetails(rideDetails);
         });
       }
     });
@@ -99,21 +102,22 @@ export class RidesService {
   // Logic to refesh perf data with leaderboards
 
   refreshPerformanceData() {
-    const maxCount = 1;
-    let count = 0;
+    // const maxCount = 1;
+    // let count = 0;
     this.getStravaToken().then(token => {
       this.getPerformanceDataToRefresh().subscribe(perfData => {
         this.incrementCount("numDbReadsDone");
         perfData.forEach(segPerformance => {
-          if (++count <= maxCount) {
-            this.getStravaData(
-              token.access_token,
-              `/segments/${segPerformance.segment_id}/leaderboard`,
-              "&following=true"
-            ).then(leaderboard => {
+          // if (++count <= maxCount) {
+          this.getStravaData(
+            token.access_token,
+            `/segments/${segPerformance.segment_id}/leaderboard`,
+            "&following=true"
+          ).then(leaderboard => {
+            if (leaderboard !== null)
               this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
-            });
-          }
+          });
+          // }
         });
       });
     });
@@ -203,6 +207,11 @@ export class RidesService {
     this.calls.next(this._calls);
   }
 
+  private propagateError(error: string) {
+    this._calls["httpDetails"] = error;
+    this.calls.next(this._calls);
+  }
+
   private transformKeyToStore(key: number | number[]) {
     if (Array.isArray(key)) {
       let keyToStore: string = "";
@@ -231,11 +240,13 @@ export class RidesService {
     const fullUrl = `${baseUrl}${api}?access_token=${token}${suffix}`;
     this.incrementCount("numStravaApiCallsMade");
     return this.http
-      .get(fullUrl)
+      .get(fullUrl, { observe: "response" })
       .toPromise()
-      .then(res => {
+      .then((res: HttpResponse<any>) => {
         this.incrementCount("numStravaApiCallsDone");
-        return res;
+        this.propagateError(`HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}`);
+        if (res.status === 200) return res.body;
+        else return null;
       });
   }
 
