@@ -1,18 +1,18 @@
 <!-- <button (click)="addData()">Add Data</button> -->
 
-
 <!-- <button (click)="getData()">Get Data</button> -->
 
 <button (click)="scrapeStravaData()">Persist new Strava Rides</button>
 
 <button (click)="refreshPerformanceData()">Refresh Performance Data</button>
 
-<p>numStravaApiCallsMade: {{ calls['numStravaApiCallsMade'] }}</p>
-<p>numStravaApiCallsDone: {{ calls['numStravaApiCallsDone'] }}</p>
-<p>numDbReadsMade: {{ calls['numDbReadsMade'] }}</p>
-<p>numDbReadsDone: {{ calls['numDbReadsDone'] }}</p>
-<p>numDbWritesMade: {{ calls['numDbWritesMade'] }}</p>
-<p>numDbWritesDone: {{ calls['numDbWritesDone'] }}</p>
-
+<p>numStravaApiCallsMade: {{ calls["numStravaApiCallsMade"] }}</p>
+<p>numStravaApiCallsDone: {{ calls["numStravaApiCallsDone"] }}</p>
+<p>numDbReadsMade: {{ calls["numDbReadsMade"] }}</p>
+<p>numDbReadsDone: {{ calls["numDbReadsDone"] }}</p>
+<p>numDbWritesMade: {{ calls["numDbWritesMade"] }}</p>
+<p>numDbWritesDone: {{ calls["numDbWritesDone"] }}</p>
+<p>{{ calls["httpDetails"] }}</p>
+<p>{{ calls["databaseMsg"] }}</p>
 
 <!-- <p>{{ rides }}</p> -->
