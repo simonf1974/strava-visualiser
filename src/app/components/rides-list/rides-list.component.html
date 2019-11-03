@@ -4,7 +4,7 @@
   [value]="rides"
   sortMode="multiple"
   [paginator]="true"
-  [rows]="5"
+  [rows]="20"
   [resizableColumns]="true"
   [reorderableColumns]="true"
 >
@@ -35,9 +35,10 @@
     </div>
   </ng-template>
 
-  <ng-template pTemplate="header" let-columns>
+  <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
       <th
+        class="table-header"
         *ngFor="let col of columns"
         [pSortableColumn]="col.field"
         pResizableColumn
@@ -50,7 +51,7 @@
 
     <tr>
       <th *ngFor="let col of columns" [ngSwitch]="col.field">
-        <p-multiSelect
+        <!-- <p-multiSelect
           *ngSwitchCase="'year'"
           [options]="years"
           [style]="{ width: '100%' }"
@@ -63,7 +64,20 @@
           [options]="months"
           [style]="{ width: '100%' }"
           (onChange)="dt.filter($event.value, col.field, 'equals')"
-        ></p-dropdown>
+        ></p-dropdown> -->
+
+        <input
+          *ngSwitchCase="'year'"
+          pInputText
+          type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')"
+        />
+        <input
+          *ngSwitchCase="'month'"
+          pInputText
+          type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')"
+        />
 
         <input
           *ngSwitchCase="'start_date_local'"
@@ -96,10 +110,10 @@
       </th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-car let-columns="columns">
+  <ng-template pTemplate="body" let-rides let-columns="columns">
     <tr>
       <td *ngFor="let col of columns" class="ui-resizable-column">
-        {{ car[col.field] }}
+        {{ rides[col.field] }}
       </td>
     </tr>
   </ng-template>

@@ -202,7 +202,7 @@ export class RidesService {
 
   getRides() {
     return this.firestore
-      .collection("rides", ref => ref.limit(1))
+      .collection("rides", ref => ref.limit(1000))
       .get()
       .toPromise()
       .then(res => {

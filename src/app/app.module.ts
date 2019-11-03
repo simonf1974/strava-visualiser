@@ -8,6 +8,7 @@ import { MultiSelectModule } from "primeng/multiselect";
 import { AngularFontAwesomeModule } from "angular-font-awesome";
 import { InputTextModule } from "primeng/inputtext";
 import { DropdownModule } from "primeng/dropdown";
+import { ChartModule } from "primeng/chart";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -21,13 +22,15 @@ import { AngularFirestoreModule } from "@angular/fire/firestore";
 import { FirestoreCrudComponent } from "./components/firestore-crud/firestore-crud.component";
 import { HttpClientModule } from "@angular/common/http";
 import { RidesListComponent } from "./components/rides-list/rides-list.component";
+import { RidesChartComponent } from './components/rides-chart/rides-chart.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     GraphComponent,
     FirestoreCrudComponent,
-    RidesListComponent
+    RidesListComponent,
+    RidesChartComponent
   ],
   imports: [
     BrowserModule,
@@ -41,7 +44,8 @@ import { RidesListComponent } from "./components/rides-list/rides-list.component
     AngularFontAwesomeModule,
     InputTextModule,
     DropdownModule,
-    FormsModule
+    FormsModule,
+    ChartModule
   ],
   providers: [RidesService],
   bootstrap: [AppComponent]
