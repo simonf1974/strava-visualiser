@@ -7,6 +7,7 @@ import {
 } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
 import { firestore, FirebaseError } from "firebase";
+import { mockRides } from "../../assets/model/mock-data";
 
 @Injectable({
   providedIn: "root"
@@ -23,6 +24,7 @@ export class RidesService {
     databaseMsg: ""
   };
   calls: BehaviorSubject<any>;
+  adjMock: IRide[];
 
   private batches: Map<number, [firestore.WriteBatch, number]> = new Map<
     number,
@@ -31,6 +33,7 @@ export class RidesService {
 
   constructor(private firestore: AngularFirestore, private http: HttpClient) {
     this.calls = new BehaviorSubject(this._calls);
+    this.adjMock = this.transformRidesForDisplay(mockRides);
   }
 
   private incrementCount(call: string) {
@@ -200,15 +203,29 @@ export class RidesService {
 
   // Database access
 
+  private transformRidesForDisplay(rides: IRide[]): IRide[] {
+    return rides.map((ride: IRide) => {
+      ride.distance = Math.floor(ride.distance / 1000);
+      ride.moving_time = Math.floor((ride.moving_time / 60 / 60) * 100) / 100;
+      ride.average_speed = Math.floor(ride.average_speed * 3.6 * 10) / 10;
+      return ride;
+    });
+  }
+
   getRides() {
-    return this.firestore
-      .collection("rides", ref => ref.limit(1000))
-      .get()
-      .toPromise()
-      .then(res => {
-        // console.log(res.docs);
-        return res.docs.map(ride => ride.data());
-      });
+    return new Promise(resolve => {
+      resolve(this.adjMock);
+    });
+
+    // return this.firestore
+    //   .collection("rides", ref => ref.limit(1000))
+    //   .get()
+    //   .toPromise()
+    //   .then(res => {
+    //     // console.log(res.docs);
+    //     return res.docs.map(ride => ride.data());
+    //   });
+
     // .catch((res: FirebaseError) => {
     //   this.incrementCount("numDbReadsDone");
     //   this.propagateMsg(

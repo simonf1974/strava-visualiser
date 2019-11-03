@@ -7,6 +7,7 @@
   [rows]="20"
   [resizableColumns]="true"
   [reorderableColumns]="true"
+  class="tdLessPadding"
 >
   <ng-template pTemplate="caption">
     <div class="caption-container">
@@ -35,6 +36,10 @@
     </div>
   </ng-template>
 
+  <ng-template pTemplate="summary">
+    There are {{ rides?.length }} rides
+  </ng-template>
+
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
       <th
@@ -51,21 +56,6 @@
 
     <tr>
       <th *ngFor="let col of columns" [ngSwitch]="col.field">
-        <!-- <p-multiSelect
-          *ngSwitchCase="'year'"
-          [options]="years"
-          [style]="{ width: '100%' }"
-          defaultLabel="All Years"
-          (onChange)="dt.filter($event.value, col.field, 'in')"
-        ></p-multiSelect>
-
-        <p-dropdown
-          *ngSwitchCase="'month'"
-          [options]="months"
-          [style]="{ width: '100%' }"
-          (onChange)="dt.filter($event.value, col.field, 'equals')"
-        ></p-dropdown> -->
-
         <input
           *ngSwitchCase="'year'"
           pInputText
