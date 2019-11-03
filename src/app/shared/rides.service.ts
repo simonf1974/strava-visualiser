@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore } from "@angular/fire/firestore";
+import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
 import {
   HttpClient,
   HttpResponse,
@@ -46,12 +46,15 @@ export class RidesService {
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number) {
+    const pageSize = 1;
+    const shouldPage = false;
+
     if (page === undefined) page = 1;
     this.getStravaToken().then(token => {
       this.getStravaData(
         token.access_token,
         "activities",
-        `&per_page=90&page=${page}`
+        `&per_page=${pageSize}&page=${page}`
       ).then(rides => {
         if (rides !== null) {
           console.log(`Got ${rides.length} for page ${page}`);
@@ -60,7 +63,7 @@ export class RidesService {
               this.processRide(ride.id, token);
             }
           });
-          if (rides.length === 90) {
+          if (shouldPage && rides.length === pageSize) {
             this.scrapeStravaData(++page);
           }
         }
@@ -196,6 +199,28 @@ export class RidesService {
   }
 
   // Database access
+
+  getRides() {
+    return this.firestore
+      .collection("rides", ref => ref.limit(1))
+      .get()
+      .toPromise()
+      .then(res => {
+        // console.log(res.docs);
+        return res.docs.map(ride => ride.data());
+      });
+    // .catch((res: FirebaseError) => {
+    //   this.incrementCount("numDbReadsDone");
+    //   this.propagateMsg(
+    //     "databaseMsg",
+    //     `Database error in get by key: Code: ${res.code}, Message: ${res.message}`
+    //   );
+    //   console.log(
+    //     `Database error: Code: ${res.code}, Message: ${res.message}`
+    //   );
+    //   return null;
+    // });
+  }
 
   private getByKeyFromDb(collection: string, key: number | number[]) {
     this.incrementCount("numDbReadsMade");
@@ -509,4 +534,37 @@ export class RidesService {
       })
     );
   }
+}
+
+export interface IRide {
+  achievement_count: number;
+  athlete_count: number;
+  athlete_id: number;
+  average_cadence: number;
+  average_speed: number;
+  average_temp: number;
+  average_watts: number;
+  calories: number;
+  comment_count: number;
+  device_watts: boolean;
+  distance: number;
+  elapsed_time: number;
+  elev_high: number;
+  elev_low: number;
+  has_heartrate: boolean;
+  id: number;
+  kudos_count: number;
+  max_speed: number;
+  max_watts: number;
+  month: string;
+  moving_time: number;
+  name: string;
+  pr_count: number;
+  start_date: string;
+  start_date_local: string;
+  timezone: string;
+  total_elevation_gain: number;
+  utc_offset: number;
+  weighted_average_watts: number;
+  year: string;
 }
