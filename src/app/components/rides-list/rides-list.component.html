@@ -1,22 +1,50 @@
-<p-table #dt [columns]="cols" [value]="rides">
+<p-table
+  #dt
+  [columns]="selectedColumns"
+  [value]="rides"
+  sortMode="multiple"
+  [paginator]="true"
+  [rows]="5"
+  [resizableColumns]="true"
+  [reorderableColumns]="true"
+>
   <ng-template pTemplate="caption">
-    <div style="text-align: right">
-      <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
-      <input
-        type="text"
-        pInputText
-        size="50"
-        placeholder="Global Filter"
-        (input)="dt.filterGlobal($event.target.value, 'contains')"
-        style="width:auto"
-      />
+    <div class="caption-container">
+      <div style="text-align:left">
+        <p-multiSelect
+          [options]="cols"
+          [(ngModel)]="selectedColumns"
+          optionLabel="header"
+          selectedItemsLabel="{0} columns selected"
+          [style]="{ minWidth: '200px' }"
+          defaultLabel="Choose Columns"
+        ></p-multiSelect>
+      </div>
+
+      <div style="text-align: right">
+        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
+        <input
+          type="text"
+          pInputText
+          size="50"
+          placeholder="Global Filter"
+          (input)="dt.filterGlobal($event.target.value, 'contains')"
+          style="width:auto"
+        />
+      </div>
     </div>
   </ng-template>
 
   <ng-template pTemplate="header" let-columns>
     <tr>
-      <th *ngFor="let col of columns">
+      <th
+        *ngFor="let col of columns"
+        [pSortableColumn]="col.field"
+        pResizableColumn
+        pReorderableColumn
+      >
         {{ col.header }}
+        <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
     </tr>
 
@@ -25,15 +53,52 @@
         <p-multiSelect
           *ngSwitchCase="'year'"
           [options]="years"
+          [style]="{ width: '100%' }"
           defaultLabel="All Years"
           (onChange)="dt.filter($event.value, col.field, 'in')"
         ></p-multiSelect>
+
+        <p-dropdown
+          *ngSwitchCase="'month'"
+          [options]="months"
+          [style]="{ width: '100%' }"
+          (onChange)="dt.filter($event.value, col.field, 'equals')"
+        ></p-dropdown>
+
+        <input
+          *ngSwitchCase="'start_date_local'"
+          pInputText
+          type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')"
+        />
+        <input
+          *ngSwitchCase="'name'"
+          pInputText
+          type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')"
+        />
+
+        <input
+          *ngSwitchCase="'distance'"
+          pInputText
+          type="text"
+          placeholder="Greater Than"
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
+        />
+
+        <input
+          *ngSwitchCase="'elapsed_time'"
+          pInputText
+          type="text"
+          placeholder="Greater Than"
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
+        />
       </th>
     </tr>
   </ng-template>
   <ng-template pTemplate="body" let-car let-columns="columns">
     <tr>
-      <td *ngFor="let col of columns">
+      <td *ngFor="let col of columns" class="ui-resizable-column">
         {{ car[col.field] }}
       </td>
     </tr>

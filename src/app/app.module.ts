@@ -1,8 +1,13 @@
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgModule } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+
 import { TableModule } from "primeng/table";
 import { MultiSelectModule } from "primeng/multiselect";
+import { AngularFontAwesomeModule } from "angular-font-awesome";
+import { InputTextModule } from "primeng/inputtext";
+import { DropdownModule } from "primeng/dropdown";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -32,7 +37,11 @@ import { RidesListComponent } from "./components/rides-list/rides-list.component
     AngularFireModule.initializeApp(environment.firebaseConfig),
     AngularFirestoreModule,
     TableModule,
-    MultiSelectModule
+    MultiSelectModule,
+    AngularFontAwesomeModule,
+    InputTextModule,
+    DropdownModule,
+    FormsModule
   ],
   providers: [RidesService],
   bootstrap: [AppComponent]
