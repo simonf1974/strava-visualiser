@@ -46,7 +46,7 @@ export class RidesService {
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number) {
-    const pageSize = 1;
+    const pageSize = 125;
     const shouldPage = false;
 
     if (page === undefined) page = 1;
@@ -306,18 +306,17 @@ export class RidesService {
   private endBatch(rideId: number) {
     console.log(`Ending batch: ${rideId}`);
     const batch = this.batches.get(rideId)[0];
-    console.log(
-      batch
-        .commit()
-        .then(res => {
-          this.incrementCount("numDbWritesDone");
-          this.batches.delete(rideId);
-        })
-        .catch(res => {
-          console.log("Error ending batch");
-          console.log(res);
-        })
-    );
+
+    batch
+      .commit()
+      .then(res => {
+        this.incrementCount("numDbWritesDone");
+        this.batches.delete(rideId);
+      })
+      .catch(res => {
+        console.log("Error ending batch");
+        console.log(res);
+      });
   }
 
   private transformKeyToStore(key: number | number[]) {

@@ -101,7 +101,15 @@
         />
 
         <input
-          *ngSwitchCase="'elapsed_time'"
+          *ngSwitchCase="'moving_time'"
+          pInputText
+          type="text"
+          placeholder="Greater Than"
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
+        />
+
+        <input
+          *ngSwitchCase="'average_speed'"
           pInputText
           type="text"
           placeholder="Greater Than"

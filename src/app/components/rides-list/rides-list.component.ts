@@ -35,13 +35,31 @@ export class RidesListComponent implements OnInit {
 
     // console.log(rides2);
 
+    this.rides = this.rides.map((ride: IRide) => {
+      ride.distance = Math.floor(ride.distance / 1000);
+
+      // const secToHHMMSS = (seconds: number) =>
+      //   `${Math.floor(seconds / 3600)}:${Math.floor(
+      //     (seconds % 3600) / 60
+      //   )}:${Math.floor((seconds % 3600) % 60)}`;
+
+      // ride.moving_time = secToHHMMSS(Number(ride.moving_time));
+
+      ride.moving_time = Math.floor((ride.moving_time / 60 / 60) * 100) / 100;
+
+      ride.average_speed = Math.floor(ride.average_speed * 3.6 * 10) / 10;
+
+      return ride;
+    });
+
     this.cols = [
       { field: "year", header: "Year" },
       { field: "month", header: "Month" },
       { field: "start_date_local", header: "Date" },
       { field: "name", header: "Name" },
-      { field: "distance", header: "Distance" },
-      { field: "elapsed_time", header: "Time" }
+      { field: "distance", header: "Distance (km)" },
+      { field: "moving_time", header: "Time (hrs)" },
+      { field: "average_speed", header: "Avg Speed (kph)" }
     ];
 
     this.selectedColumns = this.cols;
@@ -50,26 +68,26 @@ export class RidesListComponent implements OnInit {
     //   return { label: "Year", value: ride.year };
     // });
 
-    this.years = [
-      { label: "2018", value: "2018" },
-      { label: "2019", value: "2019" }
-    ];
+    // this.years = [
+    //   { label: "2018", value: "2018" },
+    //   { label: "2019", value: "2019" }
+    // ];
 
-    this.months = [
-      { label: "All Months", value: null },
-      { label: "January", value: "01" },
-      { label: "February", value: "02" },
-      { label: "March", value: "03" },
-      { label: "April", value: "04" },
-      { label: "May", value: "05" },
-      { label: "June", value: "06" },
-      { label: "July", value: "07" },
-      { label: "August", value: "08" },
-      { label: "September", value: "09" },
-      { label: "October", value: "10" },
-      { label: "November", value: "11" },
-      { label: "December", value: "12" }
-    ];
+    // this.months = [
+    //   { label: "All Months", value: null },
+    //   { label: "January", value: "01" },
+    //   { label: "February", value: "02" },
+    //   { label: "March", value: "03" },
+    //   { label: "April", value: "04" },
+    //   { label: "May", value: "05" },
+    //   { label: "June", value: "06" },
+    //   { label: "July", value: "07" },
+    //   { label: "August", value: "08" },
+    //   { label: "September", value: "09" },
+    //   { label: "October", value: "10" },
+    //   { label: "November", value: "11" },
+    //   { label: "December", value: "12" }
+    // ];
 
     FilterUtils["greaterThan"] = (value, filter): boolean => {
       if (filter === undefined || filter === null || filter.trim() === "") {

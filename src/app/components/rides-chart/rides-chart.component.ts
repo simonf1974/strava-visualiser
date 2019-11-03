@@ -22,7 +22,7 @@ export class RidesChartComponent implements OnInit {
     const distance = this.rides.map((ride: IRide) => {
       return {
         x: ride.start_date_local,
-        y: ride.distance
+        y: Math.floor(ride.distance / 1000)
       };
     });
 
@@ -32,9 +32,11 @@ export class RidesChartComponent implements OnInit {
       // console.log(ride.x.slice(0, 4));
       // console.log(Math.floor(ride.x.slice(5, 7) / 3));
 
-      const date = `${ride.x.slice(0, 4)} Q${Math.floor(
-        ride.x.slice(5, 7) / 3
-      )}`;
+      // const date = `${ride.x.slice(0, 4)} Q${Math.floor(
+      //   ride.x.slice(5, 7) / 3
+      // )}`;
+
+      const date = ride.x.slice(0, 7);
       // console.log(date);
 
       // newArray[ride.x.slice(0, 7)] =
@@ -91,15 +93,15 @@ export class RidesChartComponent implements OnInit {
               beginAtZero: true
             }
           }
+        ],
+        xAxes: [
+          {
+            type: "time",
+            time: {
+              unit: "month"
+            }
+          }
         ]
-        // xAxes: [
-        //   {
-        //     type: "time",
-        //     time: {
-        //       unit: "month"
-        //     }
-        //   }
-        // ]
       }
     };
   }
