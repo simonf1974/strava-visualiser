@@ -1,13 +1,10 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
-import {
-  HttpClient,
-  HttpResponse,
-  HttpErrorResponse
-} from "@angular/common/http";
+import { HttpClient, HttpResponse, HttpErrorResponse } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
 import { firestore, FirebaseError } from "firebase";
 import { mockRides } from "../../assets/model/mock-data";
+import { StravaService } from "./strava.service";
 
 @Injectable({
   providedIn: "root"
@@ -31,9 +28,19 @@ export class RidesService {
     [firestore.WriteBatch, number]
   >();
 
-  constructor(private firestore: AngularFirestore, private http: HttpClient) {
+  constructor(
+    private firestore: AngularFirestore,
+    private http: HttpClient,
+    private stravaService: StravaService
+  ) {
     this.calls = new BehaviorSubject(this._calls);
     this.adjMock = this.transformRidesForDisplay(mockRides);
+    this.stravaService.incrementCount.subscribe(call => {
+      if (call !== null) this.incrementCount(call);
+    });
+    this.stravaService.propagateMsg.subscribe(msg => {
+      if (msg !== null) this.propagateMsg(msg.key, msg.error);
+    });
   }
 
   private incrementCount(call: string) {
@@ -49,21 +56,18 @@ export class RidesService {
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number) {
-    const pageSize = 125;
+    const pageSize = 101;
     const shouldPage = false;
 
     if (page === undefined) page = 1;
-    this.getStravaToken().then(token => {
-      this.getStravaData(
-        token.access_token,
-        "activities",
-        `&per_page=${pageSize}&page=${page}`
-      ).then(rides => {
+    this.stravaService
+      .getStravaData("activities", `&per_page=${pageSize}&page=${page}`)
+      .then(rides => {
         if (rides !== null) {
           console.log(`Got ${rides.length} for page ${page}`);
           rides.forEach(ride => {
             if (ride.type === "Ride") {
-              this.processRide(ride.id, token);
+              this.processRide(ride.id);
             }
           });
           if (shouldPage && rides.length === pageSize) {
@@ -71,21 +75,16 @@ export class RidesService {
           }
         }
       });
-    });
   }
 
-  private processRide(rideId, token) {
+  private processRide(rideId: number) {
     this.getByKeyFromDb("rides", rideId).then(rideFromDb => {
       if (rideFromDb !== null && rideFromDb.data() === undefined) {
-        this.getStravaData(token.access_token, `activities/${rideId}`, "").then(
-          rideDetails => {
-            if (rideDetails !== null) this.saveRideDetails(rideDetails);
-            else
-              console.log(
-                "Ride details are null, I'm guessing there was an error getting the ride"
-              );
-          }
-        );
+        this.stravaService.getStravaData(`activities/${rideId}`, "").then(rideDetails => {
+          if (rideDetails !== null) this.saveRideDetails(rideDetails);
+          else
+            console.log("Ride details are null, I'm guessing there was an error getting the ride");
+        });
       }
     });
   }
@@ -94,10 +93,7 @@ export class RidesService {
     const promises: Promise<firestore.DocumentSnapshot>[] = [];
     rideDetails.segment_efforts.forEach(segEffort => {
       promises.push(
-        this.getByKeyFromDb("segment_performance", [
-          segEffort.segment.id,
-          segEffort.athlete.id
-        ])
+        this.getByKeyFromDb("segment_performance", [segEffort.segment.id, segEffort.athlete.id])
       );
     });
 
@@ -109,9 +105,7 @@ export class RidesService {
       })
       .then(res => {
         if (res === null)
-          console.log(
-            "res is null, I'm guessing there was an error getting seg perf from the DB"
-          );
+          console.log("res is null, I'm guessing there was an error getting seg perf from the DB");
 
         if (res !== null) {
           console.log(
@@ -130,10 +124,7 @@ export class RidesService {
             let segPerf;
             res.forEach(segPerformance => {
               const segPerfData = segPerformance.data();
-              if (
-                segPerfData !== undefined &&
-                segPerfData.segment_id === segEffort.segment.id
-              )
+              if (segPerfData !== undefined && segPerfData.segment_id === segEffort.segment.id)
                 segPerf = segPerfData;
             });
 
@@ -160,37 +151,33 @@ export class RidesService {
   // Logic to refesh perf data with leaderboards
 
   refreshPerformanceData() {
-    this.getStravaToken().then(token => {
-      this.getPerformanceDataToRefresh().subscribe(
-        perfData => {
-          this.incrementCount("numDbReadsDone");
-          perfData.forEach(segPerformance => {
-            if (segPerformance.requires_refresh === true) {
-              this.getStravaData(
-                token.access_token,
+    this.getPerformanceDataToRefresh().subscribe(
+      perfData => {
+        this.incrementCount("numDbReadsDone");
+        perfData.forEach(segPerformance => {
+          if (segPerformance.requires_refresh === true) {
+            this.stravaService
+              .getStravaData(
                 `/segments/${segPerformance.segment_id}/leaderboard`,
                 "&following=true"
-              ).then(leaderboard => {
+              )
+              .then(leaderboard => {
                 if (leaderboard !== null)
-                  this.applyLeaderboardToSegPerformance(
-                    segPerformance,
-                    leaderboard
-                  );
+                  this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
               });
-            }
-          });
-        },
-        (error: FirebaseError) => {
-          this.propagateMsg(
-            "databaseMsg",
-            `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`
-          );
-          console.log(
-            `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`
-          );
-        }
-      );
-    });
+          }
+        });
+      },
+      (error: FirebaseError) => {
+        this.propagateMsg(
+          "databaseMsg",
+          `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`
+        );
+        console.log(
+          `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`
+        );
+      }
+    );
   }
 
   private applyLeaderboardToSegPerformance(segPerformance, leaderboard) {
@@ -256,9 +243,7 @@ export class RidesService {
           "databaseMsg",
           `Database error in get by key: Code: ${res.code}, Message: ${res.message}`
         );
-        console.log(
-          `Database error: Code: ${res.code}, Message: ${res.message}`
-        );
+        console.log(`Database error: Code: ${res.code}, Message: ${res.message}`);
         return null;
       });
   }
@@ -299,15 +284,8 @@ export class RidesService {
     this.batches.set(rideId, [this.firestore.firestore.batch(), 0]);
   }
 
-  private addDataToBatch(
-    collection: string,
-    key: number | number[],
-    data,
-    rideId: number
-  ) {
-    const itemRef = this.firestore
-      .collection(collection)
-      .doc(this.transformKeyToStore(key)).ref;
+  private addDataToBatch(collection: string, key: number | number[], data, rideId: number) {
+    const itemRef = this.firestore.collection(collection).doc(this.transformKeyToStore(key)).ref;
 
     const batch = this.batches.get(rideId)[0];
     let count: number = this.batches.get(rideId)[1];
@@ -346,55 +324,6 @@ export class RidesService {
     } else return key.toString();
   }
 
-  //Strava API calls
-
-  private getStravaToken(): Promise<any> {
-    const url = "https://www.strava.com/oauth/token";
-    const data = {
-      client_id: "39755",
-      client_secret: "ab08660dcf7919ca0dac4111a8e1963aa9183c0d",
-      code: "072cc35b6b4327aca112a1f9fb1f05709a167288",
-      grant_type: "authorization_code"
-    };
-    return this.http.post(url, data).toPromise();
-  }
-
-  private getStravaData(
-    token: string,
-    api: string,
-    suffix: string
-  ): Promise<any> {
-    const baseUrl = "https://www.strava.com/api/v3/";
-    const fullUrl = `${baseUrl}${api}?access_token=${token}${suffix}`;
-    this.incrementCount("numStravaApiCallsMade");
-    return this.http
-      .get(fullUrl, { observe: "response" })
-      .toPromise()
-      .then((res: HttpResponse<any>) => {
-        this.incrementCount("numStravaApiCallsDone");
-        this.propagateMsg(
-          "httpDetails",
-          `HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}`
-        );
-        console.log(
-          `Strava API succeeded: HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}`
-        );
-        if (res.status === 200) return res.body;
-        else return null;
-      })
-      .catch((res: HttpErrorResponse) => {
-        this.incrementCount("numStravaApiCallsDone");
-        this.propagateMsg(
-          "httpDetails",
-          `HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}, Message: ${res.error.message}`
-        );
-        console.log(
-          `Strava API error: HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}, Message: ${res.error.message}`
-        );
-        return null;
-      });
-  }
-
   //API to database mapping
 
   private convertApiSegEffortToDbFormat(segEffort, rideId: number) {
@@ -429,10 +358,7 @@ export class RidesService {
   }
 
   private getSegEffortLastRidden(segEffort, segPerformance): string {
-    if (
-      segPerformance === undefined ||
-      segEffort.start_date > segPerformance.last_ridden_date
-    )
+    if (segPerformance === undefined || segEffort.start_date > segPerformance.last_ridden_date)
       return segEffort.start_date;
     else return segPerformance.last_ridden_date;
   }
@@ -453,15 +379,9 @@ export class RidesService {
   private convertApiSegPerformanceToDbFormat(segEffort, segPerformance) {
     return JSON.parse(
       JSON.stringify({
-        last_ridden_date: this.getSegEffortLastRidden(
-          segEffort,
-          segPerformance
-        ),
+        last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
         num_times_ridden: this.getSegEffortNumTimesRidden(segPerformance),
-        requires_refresh: this.getSegEffortRequiresRefresh(
-          segEffort,
-          segPerformance
-        ),
+        requires_refresh: this.getSegEffortRequiresRefresh(segEffort, segPerformance),
         athlete_id: segEffort.athlete.id,
         segment_id: segEffort.segment.id,
         segment: {

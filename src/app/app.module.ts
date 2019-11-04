@@ -15,6 +15,7 @@ import { AppComponent } from "./app.component";
 import { GraphComponent } from "./components/graph/graph.component";
 
 import { RidesService } from "./shared/rides.service";
+import { StravaService } from "./shared/strava.service";
 
 import { environment } from "src/environments/environment";
 import { AngularFireModule } from "@angular/fire";
@@ -22,7 +23,7 @@ import { AngularFirestoreModule } from "@angular/fire/firestore";
 import { FirestoreCrudComponent } from "./components/firestore-crud/firestore-crud.component";
 import { HttpClientModule } from "@angular/common/http";
 import { RidesListComponent } from "./components/rides-list/rides-list.component";
-import { RidesChartComponent } from './components/rides-chart/rides-chart.component';
+import { RidesChartComponent } from "./components/rides-chart/rides-chart.component";
 
 @NgModule({
   declarations: [
@@ -47,7 +48,7 @@ import { RidesChartComponent } from './components/rides-chart/rides-chart.compon
     FormsModule,
     ChartModule
   ],
-  providers: [RidesService],
+  providers: [RidesService, StravaService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
