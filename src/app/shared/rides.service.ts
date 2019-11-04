@@ -56,31 +56,21 @@ export class RidesService {
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number) {
-    const pageSize = 101;
+    const pageSize = 102;
     const shouldPage = false;
-
     if (page === undefined) page = 1;
-    this.stravaService
-      .getStravaData("activities", `&per_page=${pageSize}&page=${page}`)
-      .then(rides => {
-        if (rides !== null) {
-          console.log(`Got ${rides.length} for page ${page}`);
-          rides.forEach(ride => {
-            if (ride.type === "Ride") {
-              this.processRide(ride.id);
-            }
-          });
-          if (shouldPage && rides.length === pageSize) {
-            this.scrapeStravaData(++page);
-          }
-        }
-      });
+
+    this.stravaService.getRides(pageSize, page).then(rides => {
+      console.log(`Got ${rides.length} for page ${page}`);
+      rides.forEach(ride => this.processRide(ride));
+      if (shouldPage && rides.length === pageSize) this.scrapeStravaData(++page);
+    });
   }
 
   private processRide(rideId: number) {
     this.getByKeyFromDb("rides", rideId).then(rideFromDb => {
       if (rideFromDb !== null && rideFromDb.data() === undefined) {
-        this.stravaService.getStravaData(`activities/${rideId}`, "").then(rideDetails => {
+        this.stravaService.getRide(rideId).then(rideDetails => {
           if (rideDetails !== null) this.saveRideDetails(rideDetails);
           else
             console.log("Ride details are null, I'm guessing there was an error getting the ride");
@@ -91,9 +81,9 @@ export class RidesService {
 
   private saveRideDetails(rideDetails) {
     const promises: Promise<firestore.DocumentSnapshot>[] = [];
-    rideDetails.segment_efforts.forEach(segEffort => {
+    rideDetails.segEfforts.forEach(segEffort => {
       promises.push(
-        this.getByKeyFromDb("segment_performance", [segEffort.segment.id, segEffort.athlete.id])
+        this.getByKeyFromDb("segment_performance", [segEffort.segment_id, segEffort.athlete_id])
       );
     });
 
@@ -109,18 +99,13 @@ export class RidesService {
 
         if (res !== null) {
           console.log(
-            `About to do a batch for ride ${rideDetails.id} with ${rideDetails.segment_efforts.length} segments and ${res.length} seg perf already on the database`
+            `About to do a batch for ride ${rideDetails.ride.id} with ${rideDetails.segEfforts.length} segments and ${res.length} seg perf already on the database`
           );
-          this.startBatch(rideDetails.id);
+          this.startBatch(rideDetails.ride.id);
 
-          this.addDataToBatch(
-            "rides",
-            rideDetails.id,
-            this.convertApiRideToDbFormat(rideDetails),
-            rideDetails.id
-          );
+          this.addDataToBatch("rides", rideDetails.ride.id, rideDetails.ride, rideDetails.ride.id);
 
-          rideDetails.segment_efforts.forEach(segEffort => {
+          rideDetails.segEfforts.forEach(segEffort => {
             let segPerf;
             res.forEach(segPerformance => {
               const segPerfData = segPerformance.data();
@@ -130,20 +115,15 @@ export class RidesService {
 
             this.addDataToBatch(
               "segment_performance",
-              [segEffort.segment.id, segEffort.athlete.id],
-              this.convertApiSegPerformanceToDbFormat(segEffort, segPerf),
-              rideDetails.id
+              [segEffort.segment_id, segEffort.althlete_id],
+              this.mergeSegEffortAndSegPerf(segEffort, segPerf),
+              rideDetails.ride.id
             );
 
-            this.addDataToBatch(
-              "segment_efforts",
-              segEffort.id,
-              this.convertApiSegEffortToDbFormat(segEffort, rideDetails.id),
-              rideDetails.id
-            );
+            this.addDataToBatch("segment_efforts", segEffort.id, segEffort, rideDetails.ride.id);
           });
 
-          this.endBatch(rideDetails.id);
+          this.endBatch(rideDetails.ride.id);
         }
       });
   }
@@ -156,15 +136,10 @@ export class RidesService {
         this.incrementCount("numDbReadsDone");
         perfData.forEach(segPerformance => {
           if (segPerformance.requires_refresh === true) {
-            this.stravaService
-              .getStravaData(
-                `/segments/${segPerformance.segment_id}/leaderboard`,
-                "&following=true"
-              )
-              .then(leaderboard => {
-                if (leaderboard !== null)
-                  this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
-              });
+            this.stravaService.getLeaderboard(segPerformance.segment_id).then(leaderboard => {
+              if (leaderboard !== null)
+                this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
+            });
           }
         });
       },
@@ -184,7 +159,7 @@ export class RidesService {
     this.updateData(
       "segment_performance",
       [segPerformance.segment_id, segPerformance.athlete_id],
-      this.overlayLeaderboardOntoSegPerformance(leaderboard)
+      leaderboard
     );
   }
 
@@ -326,37 +301,6 @@ export class RidesService {
 
   //API to database mapping
 
-  private convertApiSegEffortToDbFormat(segEffort, rideId: number) {
-    return JSON.parse(
-      JSON.stringify({
-        average_cadence: segEffort.average_cadence,
-        average_watts: segEffort.average_watts,
-        device_watts: segEffort.device_watts,
-        elapsed_time: segEffort.elapsed_time,
-        id: segEffort.id,
-        moving_time: segEffort.moving_time,
-        ride_id: rideId,
-        althlete_id: segEffort.athlete.id,
-        segment_id: segEffort.segment.id,
-        start_date: segEffort.start_date,
-        start_date_local: segEffort.start_date_local,
-        segment: {
-          average_grade: segEffort.segment.average_grade,
-          city: segEffort.segment.city,
-          climb_category: segEffort.segment.climb_category,
-          country: segEffort.segment.country,
-          distance: segEffort.segment.distance,
-          elevation_high: segEffort.segment.elevation_high,
-          elevation_low: segEffort.segment.elevation_low,
-          id: segEffort.segment.id,
-          maximum_grade: segEffort.segment.maximum_grade,
-          name: segEffort.segment.name,
-          state: segEffort.segment.state
-        }
-      })
-    );
-  }
-
   private getSegEffortLastRidden(segEffort, segPerformance): string {
     if (segPerformance === undefined || segEffort.start_date > segPerformance.last_ridden_date)
       return segEffort.start_date;
@@ -376,14 +320,14 @@ export class RidesService {
     );
   }
 
-  private convertApiSegPerformanceToDbFormat(segEffort, segPerformance) {
+  private mergeSegEffortAndSegPerf(segEffort, segPerformance) {
     return JSON.parse(
       JSON.stringify({
         last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
         num_times_ridden: this.getSegEffortNumTimesRidden(segPerformance),
         requires_refresh: this.getSegEffortRequiresRefresh(segEffort, segPerformance),
-        athlete_id: segEffort.athlete.id,
-        segment_id: segEffort.segment.id,
+        athlete_id: segEffort.athlete_id,
+        segment_id: segEffort.segment_id,
         segment: {
           average_grade: segEffort.segment.average_grade,
           city: segEffort.segment.city,
@@ -392,81 +336,11 @@ export class RidesService {
           distance: segEffort.segment.distance,
           elevation_high: segEffort.segment.elevation_high,
           elevation_low: segEffort.segment.elevation_low,
-          id: segEffort.segment.id,
+          id: segEffort.segment_id,
           maximum_grade: segEffort.segment.maximum_grade,
           name: segEffort.segment.name,
           state: segEffort.segment.state
         }
-      })
-    );
-  }
-
-  private convertApiRideToDbFormat(rideDetails) {
-    return JSON.parse(
-      JSON.stringify({
-        achievement_count: rideDetails.achievement_count,
-        athlete_count: rideDetails.athlete_count,
-        athlete_id: rideDetails.athlete.id,
-        average_cadence: rideDetails.average_cadence,
-        average_speed: rideDetails.average_speed,
-        average_temp: rideDetails.average_temp,
-        average_watts: rideDetails.average_watts,
-        calories: rideDetails.calories,
-        comment_count: rideDetails.comment_count,
-        device_watts: rideDetails.device_watts,
-        distance: rideDetails.distance,
-        elapsed_time: rideDetails.elapsed_time,
-        elev_high: rideDetails.elev_high,
-        elev_low: rideDetails.elev_low,
-        has_heartrate: rideDetails.has_heartrate,
-        id: rideDetails.id,
-        kudos_count: rideDetails.kudos_count,
-        max_speed: rideDetails.max_speed,
-        max_watts: rideDetails.max_watts,
-        month: rideDetails.start_date.slice(5, 7),
-        moving_time: rideDetails.moving_time,
-        name: rideDetails.name,
-        pr_count: rideDetails.pr_count,
-        start_date: rideDetails.start_date,
-        start_date_local: rideDetails.start_date_local,
-        timezone: rideDetails.timezone,
-        total_elevation_gain: rideDetails.total_elevation_gain,
-        utc_offset: rideDetails.utc_offset,
-        weighted_average_watts: rideDetails.weighted_average_watts,
-        year: rideDetails.start_date.slice(0, 4)
-      })
-    );
-  }
-
-  private overlayLeaderboardOntoSegPerformance(leaderboard) {
-    let mainEntry;
-    let peopleAbove: string[] = [];
-    let peopleBelow: string[] = [];
-
-    leaderboard.entries.forEach(entry => {
-      if (entry.athlete_name === "Simon F.") mainEntry = entry;
-      else if (mainEntry === undefined) {
-        peopleAbove.push(entry.athlete_name);
-      } else {
-        peopleBelow.push(entry.athlete_name);
-      }
-    });
-
-    return JSON.parse(
-      JSON.stringify({
-        requires_refresh: false,
-        people_above: peopleAbove.join(", "),
-        people_below: peopleBelow.join(", "),
-        rank: mainEntry.rank,
-        pr_date: mainEntry.start_date,
-        pr_date_local: mainEntry.start_date_local,
-        pr_elapsed_time: mainEntry.elapsed_time,
-        pr_moving_time: mainEntry.moving_time,
-        top_date: leaderboard.entries[0].start_date,
-        top_date_local: leaderboard.entries[0].start_date_local,
-        top_elapsed_time: leaderboard.entries[0].elapsed_time,
-        top_moving_time: leaderboard.entries[0].moving_time,
-        entries: leaderboard.entries
       })
     );
   }
