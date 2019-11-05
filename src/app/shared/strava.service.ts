@@ -146,7 +146,7 @@ export class StravaService {
   }
 
   private convertApiRideToDbFormat(rideDetails): IRide {
-    const distance = Math.floor(rideDetails.distance / 1000);
+    const distance = Math.floor((rideDetails.distance / 1000) * 10) / 10;
     const movingTime = Math.floor((rideDetails.moving_time / 60 / 60) * 100) / 100;
     const averageSpeed = Math.floor(rideDetails.average_speed * 3.6 * 10) / 10;
     const elapsedTime = Math.floor((rideDetails.elapsed_time / 60 / 60) * 100) / 100;
