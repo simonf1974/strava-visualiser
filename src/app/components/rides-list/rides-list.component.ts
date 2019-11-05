@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
-import { RidesService, IRide } from "src/app/shared/rides.service";
+import { RidesService } from "src/app/shared/rides.service";
+import { IRide } from "../../model/model";
 import { TableModule } from "primeng/table";
 import { MultiSelectModule } from "primeng/multiselect";
 import { InputTextModule } from "primeng/inputtext";
@@ -33,8 +34,7 @@ export class RidesListComponent implements OnInit {
       ];
       this.selectedColumns = this.cols;
       FilterUtils["greaterThan"] = (value, filter): boolean => {
-        if (filter === undefined || filter === null || filter.trim() === "")
-          return true;
+        if (filter === undefined || filter === null || filter.trim() === "") return true;
         if (value === undefined || value === null) return false;
         return parseInt(filter) < value;
       };

@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { ChartModule } from "primeng/chart";
-import { IRide, RidesService } from "src/app/shared/rides.service";
+import { RidesService } from "src/app/shared/rides.service";
+import { IRide } from "../../model/model";
 import { mockRides } from "../../../assets/model/mock-data";
 
 @Component({
@@ -26,14 +27,12 @@ export class RidesChartComponent implements OnInit {
         };
       });
 
-      const distAgg = distance.reduce(
-        (newArray: any, ride: any, ind: number) => {
-          if (ind === 1) newArray = [];
-          const date = ride.x.slice(0, 7);
-          newArray[date] = (newArray[date] || 0) + ride.y;
-          return newArray;
-        }
-      );
+      const distAgg = distance.reduce((newArray: any, ride: any, ind: number) => {
+        if (ind === 1) newArray = [];
+        const date = ride.x.slice(0, 7);
+        newArray[date] = (newArray[date] || 0) + ride.y;
+        return newArray;
+      });
 
       const distAggData = Object.entries(distAgg).map(item => {
         return {

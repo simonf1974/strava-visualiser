@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse, HttpErrorResponse } from "@angular/common/http";
 import { BehaviorSubject } from "rxjs";
-import { IRide } from "./rides.service";
+import { IRide } from "../model/model";
 
 @Injectable({
   providedIn: "root"

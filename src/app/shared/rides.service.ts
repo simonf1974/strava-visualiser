@@ -1,14 +1,11 @@
 import { Injectable } from "@angular/core";
 import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
-import {
-  HttpClient,
-  HttpResponse,
-  HttpErrorResponse
-} from "@angular/common/http";
+import { HttpClient, HttpResponse, HttpErrorResponse } from "@angular/common/http";
 import { BehaviorSubject, Observable } from "rxjs";
 import { firestore, FirebaseError } from "firebase";
 import { mockRides } from "../../assets/model/mock-data";
 import { StravaService } from "./strava.service";
+import { IRide, ISegPerformance } from "../model/model";
 
 @Injectable({
   providedIn: "root"
@@ -65,36 +62,30 @@ export class RidesService {
     const maxPages = 6;
     if (page === undefined) page = 1;
 
-    this.stravaService.getRides(pageSize, page).then(rides => {
+    this.stravaService.getRides(pageSize, page).then((rides: number[]) => {
       console.log(`Got ${rides.length} for page ${page}`);
-      rides.forEach(ride => this.processRide(ride));
-      if (shouldPage && rides.length !== 0 && page <= maxPages)
-        this.scrapeStravaData(++page);
+      rides.forEach((rideId: number) => this.processRide(rideId));
+      if (shouldPage && rides.length !== 0 && page <= maxPages) this.scrapeStravaData(++page);
     });
   }
 
   private processRide(rideId: number) {
-    this.getByKeyFromDb("rides", rideId).then(rideFromDb => {
-      if (rideFromDb !== null && rideFromDb.data() === undefined) {
+    this.getByKeyFromDb("rides", rideId).then((rideFromDb: IRide) => {
+      if (rideFromDb !== null && rideFromDb === undefined) {
         this.stravaService.getRide(rideId).then(rideDetails => {
           if (rideDetails !== null) this.saveRideDetails(rideDetails);
           else
-            console.log(
-              "Ride details are null, I'm guessing there was an error getting the ride"
-            );
+            console.log("Ride details are null, I'm guessing there was an error getting the ride");
         });
       }
     });
   }
 
   private saveRideDetails(rideDetails) {
-    const promises: Promise<firestore.DocumentSnapshot>[] = [];
+    const promises: Promise<ISegPerformance>[] = [];
     rideDetails.segEfforts.forEach(segEffort => {
       promises.push(
-        this.getByKeyFromDb("segment_performance", [
-          segEffort.segment_id,
-          segEffort.athlete_id
-        ])
+        this.getByKeyFromDb("segment_performance", [segEffort.segment_id, segEffort.athlete_id])
       );
     });
 
@@ -106,9 +97,7 @@ export class RidesService {
       })
       .then(res => {
         if (res === null)
-          console.log(
-            "res is null, I'm guessing there was an error getting seg perf from the DB"
-          );
+          console.log("res is null, I'm guessing there was an error getting seg perf from the DB");
 
         if (res !== null) {
           console.log(
@@ -116,22 +105,16 @@ export class RidesService {
           );
           this.startBatch(rideDetails.ride.id);
 
-          this.addDataToBatch(
-            "rides",
-            rideDetails.ride.id,
-            rideDetails.ride,
-            rideDetails.ride.id
-          );
+          this.addDataToBatch("rides", rideDetails.ride.id, rideDetails.ride, rideDetails.ride.id);
 
           rideDetails.segEfforts.forEach(segEffort => {
             let segPerf;
             res.forEach(segPerformance => {
-              const segPerfData = segPerformance.data();
               if (
-                segPerfData !== undefined &&
-                segPerfData.segment_id === segEffort.segment.id
+                segPerformance !== undefined &&
+                segPerformance.segment_id === segEffort.segment.id
               )
-                segPerf = segPerfData;
+                segPerf = segPerformance;
             });
 
             this.addDataToBatch(
@@ -141,12 +124,7 @@ export class RidesService {
               rideDetails.ride.id
             );
 
-            this.addDataToBatch(
-              "segment_efforts",
-              segEffort.id,
-              segEffort,
-              rideDetails.ride.id
-            );
+            this.addDataToBatch("segment_efforts", segEffort.id, segEffort, rideDetails.ride.id);
           });
 
           this.endBatch(rideDetails.ride.id);
@@ -162,15 +140,10 @@ export class RidesService {
         this.incrementCount("numDbReadsDone");
         perfData.forEach(segPerformance => {
           if (segPerformance.requires_refresh === true) {
-            this.stravaService
-              .getLeaderboard(segPerformance.segment_id)
-              .then(leaderboard => {
-                if (leaderboard !== null)
-                  this.applyLeaderboardToSegPerformance(
-                    segPerformance,
-                    leaderboard
-                  );
-              });
+            this.stravaService.getLeaderboard(segPerformance.segment_id).then(leaderboard => {
+              if (leaderboard !== null)
+                this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
+            });
           }
         });
       },
@@ -232,7 +205,7 @@ export class RidesService {
     // });
   }
 
-  private getByKeyFromDb(collection: string, key: number | number[]) {
+  private getByKeyFromDb(collection: string, key: number | number[]): Promise<any> {
     this.incrementCount("numDbReadsMade");
     return this.firestore
       .collection(collection)
@@ -241,7 +214,7 @@ export class RidesService {
       .toPromise()
       .then(res => {
         this.incrementCount("numDbReadsDone");
-        return res;
+        return res.data();
       })
       .catch((res: FirebaseError) => {
         this.incrementCount("numDbReadsDone");
@@ -249,9 +222,7 @@ export class RidesService {
           "databaseMsg",
           `Database error in get by key: Code: ${res.code}, Message: ${res.message}`
         );
-        console.log(
-          `Database error: Code: ${res.code}, Message: ${res.message}`
-        );
+        console.log(`Database error: Code: ${res.code}, Message: ${res.message}`);
         return null;
       });
   }
@@ -292,15 +263,8 @@ export class RidesService {
     this.batches.set(rideId, [this.firestore.firestore.batch(), 0]);
   }
 
-  private addDataToBatch(
-    collection: string,
-    key: number | number[],
-    data,
-    rideId: number
-  ) {
-    const itemRef = this.firestore
-      .collection(collection)
-      .doc(this.transformKeyToStore(key)).ref;
+  private addDataToBatch(collection: string, key: number | number[], data, rideId: number) {
+    const itemRef = this.firestore.collection(collection).doc(this.transformKeyToStore(key)).ref;
 
     const batch = this.batches.get(rideId)[0];
     let count: number = this.batches.get(rideId)[1];
@@ -342,10 +306,7 @@ export class RidesService {
   //API to database mapping
 
   private getSegEffortLastRidden(segEffort, segPerformance): string {
-    if (
-      segPerformance === undefined ||
-      segEffort.start_date > segPerformance.last_ridden_date
-    )
+    if (segPerformance === undefined || segEffort.start_date > segPerformance.last_ridden_date)
       return segEffort.start_date;
     else return segPerformance.last_ridden_date;
   }
@@ -366,15 +327,9 @@ export class RidesService {
   private mergeSegEffortAndSegPerf(segEffort, segPerformance) {
     return JSON.parse(
       JSON.stringify({
-        last_ridden_date: this.getSegEffortLastRidden(
-          segEffort,
-          segPerformance
-        ),
+        last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
         num_times_ridden: this.getSegEffortNumTimesRidden(segPerformance),
-        requires_refresh: this.getSegEffortRequiresRefresh(
-          segEffort,
-          segPerformance
-        ),
+        requires_refresh: this.getSegEffortRequiresRefresh(segEffort, segPerformance),
         athlete_id: segEffort.athlete_id,
         segment_id: segEffort.segment_id,
         segment: {
@@ -393,37 +348,4 @@ export class RidesService {
       })
     );
   }
-}
-
-export interface IRide {
-  achievement_count: number;
-  athlete_count: number;
-  athlete_id: number;
-  average_cadence: number;
-  average_speed: number;
-  average_temp: number;
-  average_watts: number;
-  calories: number;
-  comment_count: number;
-  device_watts: boolean;
-  distance: number;
-  elapsed_time: number;
-  elev_high: number;
-  elev_low: number;
-  has_heartrate: boolean;
-  id: number;
-  kudos_count: number;
-  max_speed: number;
-  max_watts: number;
-  month: string;
-  moving_time: number;
-  name: string;
-  pr_count: number;
-  start_date: string;
-  start_date_local: string;
-  timezone: string;
-  total_elevation_gain: number;
-  utc_offset: number;
-  weighted_average_watts: number;
-  year: string;
 }
