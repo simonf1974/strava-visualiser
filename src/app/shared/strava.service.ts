@@ -1,7 +1,13 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpResponse, HttpErrorResponse } from "@angular/common/http";
 import { BehaviorSubject } from "rxjs";
-import { IRide } from "../model/model";
+import {
+  IRide,
+  ISegPerfPreUpdate,
+  IRideDetails,
+  ISegEffort,
+  ILeaderboardEntry
+} from "../model/model";
 
 @Injectable({
   providedIn: "root"
@@ -50,7 +56,7 @@ export class StravaService {
     });
   }
 
-  getLeaderboard(segmentId: number) {
+  getLeaderboard(segmentId: number): Promise<ISegPerfPreUpdate> {
     return this.getStravaData(`/segments/${segmentId}/leaderboard`, "&following=true").then(
       leaderboard => {
         if (leaderboard === null) return null;
@@ -59,13 +65,13 @@ export class StravaService {
     );
   }
 
-  getRide(rideId: number) {
+  getRide(rideId: number): Promise<IRideDetails> {
     return this.getStravaData(`activities/${rideId}`, "").then(ride => {
       if (ride === null) return null;
       else {
         const convertedRide: IRide = this.convertApiRideToDbFormat(ride);
-        const convertedSegEfforts = ride.segment_efforts.map(segEffort =>
-          this.convertApiSegEffortToDbFormat(segEffort, ride.id)
+        const convertedSegEfforts: ISegEffort[] = ride.segment_efforts.map(
+          (segEffort: ISegEffort) => this.convertApiSegEffortToDbFormat(segEffort, convertedRide.id)
         );
         return { ride: convertedRide, segEfforts: convertedSegEfforts };
       }
@@ -108,7 +114,7 @@ export class StravaService {
 
   //API to database mapping
 
-  private convertApiSegEffortToDbFormat(segEffort, rideId: number) {
+  private convertApiSegEffortToDbFormat(segEffort, rideId: number): ISegEffort {
     return JSON.parse(
       JSON.stringify({
         average_cadence: segEffort.average_cadence,
@@ -118,7 +124,7 @@ export class StravaService {
         id: segEffort.id,
         moving_time: segEffort.moving_time,
         ride_id: rideId,
-        althlete_id: segEffort.athlete.id,
+        athlete_id: segEffort.athlete.id,
         segment_id: segEffort.segment.id,
         start_date: segEffort.start_date,
         start_date_local: segEffort.start_date_local,
@@ -139,7 +145,7 @@ export class StravaService {
     );
   }
 
-  private convertApiRideToDbFormat(rideDetails) {
+  private convertApiRideToDbFormat(rideDetails): IRide {
     return JSON.parse(
       JSON.stringify({
         achievement_count: rideDetails.achievement_count,
@@ -176,12 +182,12 @@ export class StravaService {
     );
   }
 
-  private convertApiLeaderboardToSegPerfDbFormat(leaderboard) {
-    let mainEntry;
+  private convertApiLeaderboardToSegPerfDbFormat(leaderboard): ISegPerfPreUpdate {
+    let mainEntry: ILeaderboardEntry;
     let peopleAbove: string[] = [];
     let peopleBelow: string[] = [];
 
-    leaderboard.entries.forEach(entry => {
+    leaderboard.entries.forEach((entry: ILeaderboardEntry) => {
       if (entry.athlete_name === "Simon F.") mainEntry = entry;
       else if (mainEntry === undefined) {
         peopleAbove.push(entry.athlete_name);
@@ -196,6 +202,7 @@ export class StravaService {
         people_above: peopleAbove.join(", "),
         people_below: peopleBelow.join(", "),
         rank: mainEntry.rank,
+        num_entries: leaderboard.entries.count,
         pr_date: mainEntry.start_date,
         pr_date_local: mainEntry.start_date_local,
         pr_elapsed_time: mainEntry.elapsed_time,

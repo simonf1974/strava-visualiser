@@ -44,7 +44,7 @@ export interface ISegEffort {
   id: number;
   moving_time: number;
   ride_id: number;
-  althlete_id: number;
+  athlete_id: number;
   segment_id: number;
   start_date: string;
   start_date_local: string;
@@ -65,6 +65,35 @@ export interface ISegment {
   state: string;
 }
 
+export interface ISegPerfPreSave {
+  last_ridden_date: string;
+  num_times_ridden: number;
+  requires_refresh: boolean;
+  athlete_id: number;
+  segment_id: number;
+  segment: ISegment;
+}
+
+export interface ISegPerfPreUpdate {
+  requires_refresh: boolean;
+  athlete_id: number;
+  segment_id: number;
+  segment: ISegment;
+  people_above: string;
+  people_below: string;
+  rank: number;
+  num_entries: number;
+  pr_date: string;
+  pr_date_local: string;
+  pr_elapsed_time: number;
+  pr_moving_time: number;
+  top_date: string;
+  top_date_local: string;
+  top_elapsed_time: number;
+  top_moving_time: number;
+  entries: ILeaderboardEntry[];
+}
+
 export interface ISegPerformance {
   last_ridden_date: string;
   num_times_ridden: number;
@@ -75,6 +104,7 @@ export interface ISegPerformance {
   people_above: string;
   people_below: string;
   rank: number;
+  num_entries: number;
   pr_date: string;
   pr_date_local: string;
   pr_elapsed_time: number;

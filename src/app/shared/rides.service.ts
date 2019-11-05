@@ -1,11 +1,17 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore, QuerySnapshot } from "@angular/fire/firestore";
-import { HttpClient, HttpResponse, HttpErrorResponse } from "@angular/common/http";
+import { AngularFirestore, DocumentSnapshot, CollectionReference } from "@angular/fire/firestore";
 import { BehaviorSubject, Observable } from "rxjs";
 import { firestore, FirebaseError } from "firebase";
 import { mockRides } from "../../assets/model/mock-data";
 import { StravaService } from "./strava.service";
-import { IRide, ISegPerformance } from "../model/model";
+import {
+  IRide,
+  ISegPerformance,
+  IRideDetails,
+  ISegEffort,
+  ISegPerfPreUpdate,
+  ISegPerfPreSave
+} from "../model/model";
 
 @Injectable({
   providedIn: "root"
@@ -29,11 +35,7 @@ export class RidesService {
     [firestore.WriteBatch, number]
   >();
 
-  constructor(
-    private firestore: AngularFirestore,
-    private http: HttpClient,
-    private stravaService: StravaService
-  ) {
+  constructor(private firestore: AngularFirestore, private stravaService: StravaService) {
     this.calls = new BehaviorSubject(this._calls);
     this.adjMock = this.transformRidesForDisplay(mockRides);
     this.stravaService.incrementCount.subscribe(call => {
@@ -44,21 +46,21 @@ export class RidesService {
     });
   }
 
-  private incrementCount(call: string) {
+  private incrementCount(call: string): void {
     this._calls[call] = ++this._calls[call];
     this.calls.next(this._calls);
   }
 
-  private propagateMsg(key: string, error: string) {
+  private propagateMsg(key: string, error: string): void {
     this._calls[key] = error;
     this.calls.next(this._calls);
   }
 
   // Main logic for scraping Strava data and saving to database
 
-  scrapeStravaData(page?: number) {
-    const pageSize = 50;
-    const shouldPage = true;
+  scrapeStravaData(page?: number): void {
+    const pageSize = 2;
+    const shouldPage = false;
     const maxPages = 6;
     if (page === undefined) page = 1;
 
@@ -69,10 +71,10 @@ export class RidesService {
     });
   }
 
-  private processRide(rideId: number) {
+  private processRide(rideId: number): void {
     this.getByKeyFromDb("rides", rideId).then((rideFromDb: IRide) => {
       if (rideFromDb !== null && rideFromDb === undefined) {
-        this.stravaService.getRide(rideId).then(rideDetails => {
+        this.stravaService.getRide(rideId).then((rideDetails: IRideDetails) => {
           if (rideDetails !== null) this.saveRideDetails(rideDetails);
           else
             console.log("Ride details are null, I'm guessing there was an error getting the ride");
@@ -81,9 +83,9 @@ export class RidesService {
     });
   }
 
-  private saveRideDetails(rideDetails) {
+  private saveRideDetails(rideDetails: IRideDetails): void {
     const promises: Promise<ISegPerformance>[] = [];
-    rideDetails.segEfforts.forEach(segEffort => {
+    rideDetails.segEfforts.forEach((segEffort: ISegEffort) => {
       promises.push(
         this.getByKeyFromDb("segment_performance", [segEffort.segment_id, segEffort.athlete_id])
       );
@@ -95,21 +97,21 @@ export class RidesService {
         console.log(res);
         return null;
       })
-      .then(res => {
-        if (res === null)
+      .then((segPerfs: ISegPerformance[]) => {
+        if (segPerfs === null)
           console.log("res is null, I'm guessing there was an error getting seg perf from the DB");
 
-        if (res !== null) {
+        if (segPerfs !== null) {
           console.log(
-            `About to do a batch for ride ${rideDetails.ride.id} with ${rideDetails.segEfforts.length} segments and ${res.length} seg perf already on the database`
+            `About to do a batch for ride ${rideDetails.ride.id} with ${rideDetails.segEfforts.length} segments and ${segPerfs.length} seg perf already on the database`
           );
           this.startBatch(rideDetails.ride.id);
 
           this.addDataToBatch("rides", rideDetails.ride.id, rideDetails.ride, rideDetails.ride.id);
 
-          rideDetails.segEfforts.forEach(segEffort => {
-            let segPerf;
-            res.forEach(segPerformance => {
+          rideDetails.segEfforts.forEach((segEffort: ISegEffort) => {
+            let segPerf: ISegPerformance;
+            segPerfs.forEach(segPerformance => {
               if (
                 segPerformance !== undefined &&
                 segPerformance.segment_id === segEffort.segment.id
@@ -119,13 +121,20 @@ export class RidesService {
 
             this.addDataToBatch(
               "segment_performance",
-              [segEffort.segment_id, segEffort.althlete_id],
+              [segEffort.segment_id, segEffort.athlete_id],
               this.mergeSegEffortAndSegPerf(segEffort, segPerf),
               rideDetails.ride.id
             );
 
-            this.addDataToBatch("segment_efforts", segEffort.id, segEffort, rideDetails.ride.id);
+            // this.addDataToBatch("segment_efforts", segEffort.id, segEffort, rideDetails.ride.id);
           });
+
+          this.addDataToBatch(
+            "ride_seg_efforts",
+            rideDetails.ride.id,
+            { seg_efforts: rideDetails.segEfforts },
+            rideDetails.ride.id
+          );
 
           this.endBatch(rideDetails.ride.id);
         }
@@ -134,16 +143,18 @@ export class RidesService {
 
   // Logic to refesh perf data with leaderboards
 
-  refreshPerformanceData() {
+  refreshPerformanceData(): void {
     this.getPerformanceDataToRefresh().subscribe(
-      perfData => {
+      (perfData: ISegPerformance[]) => {
         this.incrementCount("numDbReadsDone");
-        perfData.forEach(segPerformance => {
+        perfData.forEach((segPerformance: ISegPerformance) => {
           if (segPerformance.requires_refresh === true) {
-            this.stravaService.getLeaderboard(segPerformance.segment_id).then(leaderboard => {
-              if (leaderboard !== null)
-                this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
-            });
+            this.stravaService
+              .getLeaderboard(segPerformance.segment_id)
+              .then((leaderboard: ISegPerfPreUpdate) => {
+                if (leaderboard !== null)
+                  this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
+              });
           }
         });
       },
@@ -159,7 +170,10 @@ export class RidesService {
     );
   }
 
-  private applyLeaderboardToSegPerformance(segPerformance, leaderboard) {
+  private applyLeaderboardToSegPerformance(
+    segPerformance: ISegPerformance,
+    leaderboard: ISegPerfPreUpdate
+  ): void {
     this.updateData(
       "segment_performance",
       [segPerformance.segment_id, segPerformance.athlete_id],
@@ -178,7 +192,7 @@ export class RidesService {
     });
   }
 
-  getRides() {
+  getRides(): Promise<IRide[]> {
     return new Promise(resolve => {
       resolve(this.adjMock);
     });
@@ -212,7 +226,7 @@ export class RidesService {
       .doc(this.transformKeyToStore(key))
       .get()
       .toPromise()
-      .then(res => {
+      .then((res: DocumentSnapshot<any>) => {
         this.incrementCount("numDbReadsDone");
         return res.data();
       })
@@ -231,7 +245,7 @@ export class RidesService {
     this.incrementCount("numDbReadsMade");
     console.log("Getting seg perf to refresh");
     return this.firestore
-      .collection("segment_performance", ref =>
+      .collection("segment_performance", (ref: CollectionReference) =>
         ref
           .where("requires_refresh", "==", true)
           .orderBy("num_times_ridden", "desc")
@@ -240,7 +254,7 @@ export class RidesService {
       .valueChanges();
   }
 
-  private updateData(collection: string, key: number | number[], data) {
+  private updateData(collection: string, key: number | number[], data): Promise<any> {
     this.incrementCount("numDbWritesMade");
     console.log(`Updating this seg perf: ${this.transformKeyToStore(key)}`);
     return new Promise<any>((resolve, reject) => {
@@ -257,13 +271,13 @@ export class RidesService {
     });
   }
 
-  private startBatch(rideId: number) {
+  private startBatch(rideId: number): void {
     this.incrementCount("numDbWritesMade");
     console.log(`Starting batch: ${rideId}`);
     this.batches.set(rideId, [this.firestore.firestore.batch(), 0]);
   }
 
-  private addDataToBatch(collection: string, key: number | number[], data, rideId: number) {
+  private addDataToBatch(collection: string, key: number | number[], data, rideId: number): void {
     const itemRef = this.firestore.collection(collection).doc(this.transformKeyToStore(key)).ref;
 
     const batch = this.batches.get(rideId)[0];
@@ -277,7 +291,7 @@ export class RidesService {
     this.batches.get(rideId)[0].set(itemRef, data, { merge: true });
   }
 
-  private endBatch(rideId: number) {
+  private endBatch(rideId: number): void {
     console.log(`Ending batch: ${rideId}`);
     const batch = this.batches.get(rideId)[0];
 
@@ -293,7 +307,7 @@ export class RidesService {
       });
   }
 
-  private transformKeyToStore(key: number | number[]) {
+  private transformKeyToStore(key: number | number[]): string {
     if (Array.isArray(key)) {
       let keyToStore: string = "";
       key.forEach(k => {
@@ -324,7 +338,10 @@ export class RidesService {
     );
   }
 
-  private mergeSegEffortAndSegPerf(segEffort, segPerformance) {
+  private mergeSegEffortAndSegPerf(
+    segEffort: ISegEffort,
+    segPerformance: ISegPerformance
+  ): ISegPerfPreSave {
     return JSON.parse(
       JSON.stringify({
         last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
