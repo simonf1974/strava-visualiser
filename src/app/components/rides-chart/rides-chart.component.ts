@@ -22,17 +22,19 @@ export class RidesChartComponent implements OnInit {
 
       const distance = this.rides.map((ride: IRide) => {
         return {
-          x: ride.start_date_local,
+          x: ride.start_date,
           y: ride.distance
         };
       });
 
-      const distAgg = distance.reduce((newArray: any, ride: any, ind: number) => {
-        if (ind === 1) newArray = [];
-        const date = ride.x.slice(0, 7);
-        newArray[date] = (newArray[date] || 0) + ride.y;
-        return newArray;
-      });
+      const distAgg = distance.reduce(
+        (newArray: any, ride: any, ind: number) => {
+          if (ind === 1) newArray = [];
+          const date = ride.x.slice(0, 7);
+          newArray[date] = (newArray[date] || 0) + ride.y;
+          return newArray;
+        }
+      );
 
       const distAggData = Object.entries(distAgg).map(item => {
         return {

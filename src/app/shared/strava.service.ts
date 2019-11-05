@@ -114,72 +114,75 @@ export class StravaService {
 
   //API to database mapping
 
+  private removeUndefined(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
   private convertApiSegEffortToDbFormat(segEffort, rideId: number): ISegEffort {
-    return JSON.parse(
-      JSON.stringify({
-        average_cadence: segEffort.average_cadence,
-        average_watts: segEffort.average_watts,
-        device_watts: segEffort.device_watts,
-        elapsed_time: segEffort.elapsed_time,
-        id: segEffort.id,
-        moving_time: segEffort.moving_time,
-        ride_id: rideId,
-        athlete_id: segEffort.athlete.id,
-        segment_id: segEffort.segment.id,
-        start_date: segEffort.start_date,
-        start_date_local: segEffort.start_date_local,
-        segment: {
-          average_grade: segEffort.segment.average_grade,
-          city: segEffort.segment.city,
-          climb_category: segEffort.segment.climb_category,
-          country: segEffort.segment.country,
-          distance: segEffort.segment.distance,
-          elevation_high: segEffort.segment.elevation_high,
-          elevation_low: segEffort.segment.elevation_low,
-          id: segEffort.segment.id,
-          maximum_grade: segEffort.segment.maximum_grade,
-          name: segEffort.segment.name,
-          state: segEffort.segment.state
-        }
-      })
-    );
+    const dbSegEffort: ISegEffort = {
+      average_cadence: segEffort.average_cadence,
+      average_watts: segEffort.average_watts,
+      device_watts: segEffort.device_watts,
+      elapsed_time: segEffort.elapsed_time,
+      id: segEffort.id,
+      moving_time: segEffort.moving_time,
+      segment_id: segEffort.segment.id,
+      start_date: segEffort.start_date,
+      segment: {
+        average_grade: segEffort.segment.average_grade,
+        city: segEffort.segment.city,
+        climb_category: segEffort.segment.climb_category,
+        country: segEffort.segment.country,
+        distance: segEffort.segment.distance,
+        elevation_high: segEffort.segment.elevation_high,
+        elevation_low: segEffort.segment.elevation_low,
+        id: segEffort.segment.id,
+        maximum_grade: segEffort.segment.maximum_grade,
+        name: segEffort.segment.name,
+        state: segEffort.segment.state
+      }
+    };
+    return this.removeUndefined(dbSegEffort);
   }
 
   private convertApiRideToDbFormat(rideDetails): IRide {
-    return JSON.parse(
-      JSON.stringify({
-        achievement_count: rideDetails.achievement_count,
-        athlete_count: rideDetails.athlete_count,
-        athlete_id: rideDetails.athlete.id,
-        average_cadence: rideDetails.average_cadence,
-        average_speed: rideDetails.average_speed,
-        average_temp: rideDetails.average_temp,
-        average_watts: rideDetails.average_watts,
-        calories: rideDetails.calories,
-        comment_count: rideDetails.comment_count,
-        device_watts: rideDetails.device_watts,
-        distance: rideDetails.distance,
-        elapsed_time: rideDetails.elapsed_time,
-        elev_high: rideDetails.elev_high,
-        elev_low: rideDetails.elev_low,
-        has_heartrate: rideDetails.has_heartrate,
-        id: rideDetails.id,
-        kudos_count: rideDetails.kudos_count,
-        max_speed: rideDetails.max_speed,
-        max_watts: rideDetails.max_watts,
-        month: rideDetails.start_date.slice(5, 7),
-        moving_time: rideDetails.moving_time,
-        name: rideDetails.name,
-        pr_count: rideDetails.pr_count,
-        start_date: rideDetails.start_date,
-        start_date_local: rideDetails.start_date_local,
-        timezone: rideDetails.timezone,
-        total_elevation_gain: rideDetails.total_elevation_gain,
-        utc_offset: rideDetails.utc_offset,
-        weighted_average_watts: rideDetails.weighted_average_watts,
-        year: rideDetails.start_date.slice(0, 4)
-      })
-    );
+    const distance = Math.floor(rideDetails.distance / 1000);
+    const movingTime = Math.floor((rideDetails.moving_time / 60 / 60) * 100) / 100;
+    const averageSpeed = Math.floor(rideDetails.average_speed * 3.6 * 10) / 10;
+    const elapsedTime = Math.floor((rideDetails.elapsed_time / 60 / 60) * 100) / 100;
+    const maxSpeed = Math.floor(rideDetails.average_speed * 3.6 * 10) / 10;
+
+    const rideDate = new Date(rideDetails.start_date);
+    const dbRide: IRide = {
+      achievement_count: rideDetails.achievement_count,
+      athlete_count: rideDetails.athlete_count,
+      athlete_id: rideDetails.athlete.id,
+      average_cadence: rideDetails.average_cadence,
+      average_speed: averageSpeed,
+      average_temp: rideDetails.average_temp,
+      average_watts: rideDetails.average_watts,
+      calories: rideDetails.calories,
+      comment_count: rideDetails.comment_count,
+      device_watts: rideDetails.device_watts,
+      distance: distance,
+      elapsed_time: elapsedTime,
+      elev_high: rideDetails.elev_high,
+      elev_low: rideDetails.elev_low,
+      has_heartrate: rideDetails.has_heartrate,
+      id: rideDetails.id,
+      kudos_count: rideDetails.kudos_count,
+      max_speed: maxSpeed,
+      max_watts: rideDetails.max_watts,
+      month: rideDetails.toLocaleString("default", { month: "long" }),
+      moving_time: movingTime,
+      name: rideDetails.name,
+      pr_count: rideDetails.pr_count,
+      start_date: rideDetails.start_date,
+      total_elevation_gain: rideDetails.total_elevation_gain,
+      weighted_average_watts: rideDetails.weighted_average_watts,
+      year: rideDate.getFullYear()
+    };
+    return this.removeUndefined(dbRide);
   }
 
   private convertApiLeaderboardToSegPerfDbFormat(leaderboard): ISegPerfPreUpdate {
@@ -187,7 +190,7 @@ export class StravaService {
     let peopleAbove: string[] = [];
     let peopleBelow: string[] = [];
 
-    leaderboard.entries.forEach((entry: ILeaderboardEntry) => {
+    leaderboard.entries.forEach(entry => {
       if (entry.athlete_name === "Simon F.") mainEntry = entry;
       else if (mainEntry === undefined) {
         peopleAbove.push(entry.athlete_name);
@@ -196,23 +199,31 @@ export class StravaService {
       }
     });
 
-    return JSON.parse(
-      JSON.stringify({
-        requires_refresh: false,
-        people_above: peopleAbove.join(", "),
-        people_below: peopleBelow.join(", "),
-        rank: mainEntry.rank,
-        num_entries: leaderboard.entries.count,
-        pr_date: mainEntry.start_date,
-        pr_date_local: mainEntry.start_date_local,
-        pr_elapsed_time: mainEntry.elapsed_time,
-        pr_moving_time: mainEntry.moving_time,
-        top_date: leaderboard.entries[0].start_date,
-        top_date_local: leaderboard.entries[0].start_date_local,
-        top_elapsed_time: leaderboard.entries[0].elapsed_time,
-        top_moving_time: leaderboard.entries[0].moving_time,
-        entries: leaderboard.entries
-      })
-    );
+    const dbEntries: ILeaderboardEntry[] = leaderboard.entries.map(entry => {
+      const ent: ILeaderboardEntry = {
+        athlete_name: entry.athlete_name,
+        elapsed_time: entry.elapsed_time,
+        moving_time: entry.moving_time,
+        start_date: entry.start_date,
+        rank: entry.entry
+      };
+      return ent;
+    });
+
+    const dbSegPerf: ISegPerfPreUpdate = {
+      requires_refresh: false,
+      people_above: peopleAbove.join(", "),
+      people_below: peopleBelow.join(", "),
+      rank: mainEntry.rank,
+      num_entries: leaderboard.entries.count,
+      pr_date: mainEntry.start_date,
+      pr_elapsed_time: mainEntry.elapsed_time,
+      pr_moving_time: mainEntry.moving_time,
+      top_date: leaderboard.entries[0].start_date,
+      top_elapsed_time: leaderboard.entries[0].elapsed_time,
+      top_moving_time: leaderboard.entries[0].moving_time,
+      entries: dbEntries
+    };
+    return this.removeUndefined(dbSegPerf);
   }
 }

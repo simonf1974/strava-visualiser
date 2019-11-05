@@ -28,12 +28,9 @@ export interface IRide {
   name: string;
   pr_count: number;
   start_date: string;
-  start_date_local: string;
-  timezone: string;
   total_elevation_gain: number;
-  utc_offset: number;
   weighted_average_watts: number;
-  year: string;
+  year: number;
 }
 
 export interface ISegEffort {
@@ -43,11 +40,8 @@ export interface ISegEffort {
   elapsed_time: number;
   id: number;
   moving_time: number;
-  ride_id: number;
-  athlete_id: number;
   segment_id: number;
   start_date: string;
-  start_date_local: string;
   segment: ISegment;
 }
 
@@ -76,19 +70,14 @@ export interface ISegPerfPreSave {
 
 export interface ISegPerfPreUpdate {
   requires_refresh: boolean;
-  athlete_id: number;
-  segment_id: number;
-  segment: ISegment;
   people_above: string;
   people_below: string;
   rank: number;
   num_entries: number;
   pr_date: string;
-  pr_date_local: string;
   pr_elapsed_time: number;
   pr_moving_time: number;
   top_date: string;
-  top_date_local: string;
   top_elapsed_time: number;
   top_moving_time: number;
   entries: ILeaderboardEntry[];
@@ -106,11 +95,9 @@ export interface ISegPerformance {
   rank: number;
   num_entries: number;
   pr_date: string;
-  pr_date_local: string;
   pr_elapsed_time: number;
   pr_moving_time: number;
   top_date: string;
-  top_date_local: string;
   top_elapsed_time: number;
   top_moving_time: number;
   entries: ILeaderboardEntry[];
@@ -121,6 +108,5 @@ export interface ILeaderboardEntry {
   elapsed_time: number;
   moving_time: number;
   start_date: string;
-  start_date_local: string;
   rank: number;
 }
