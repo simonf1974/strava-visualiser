@@ -27,11 +27,8 @@ export class StravaService {
   private getStravaToken(): Promise<string> {
     if (this.token !== undefined)
       return new Promise(resolve => {
-        console.log("already got a token");
         resolve(this.token);
       });
-
-    console.log("need to get a token");
 
     const url = "https://www.strava.com/oauth/token";
     const data = {
@@ -44,6 +41,7 @@ export class StravaService {
       .post(url, data)
       .toPromise()
       .then((token: any) => {
+        console.log(token.access_token);
         this.token = token.access_token;
         return this.token;
       });
@@ -57,12 +55,22 @@ export class StravaService {
   }
 
   getLeaderboard(segmentId: number): Promise<ISegPerfPreUpdate> {
-    return this.getStravaData(`/segments/${segmentId}/leaderboard`, "&following=true").then(
-      leaderboard => {
-        if (leaderboard === null) return null;
-        return this.convertApiLeaderboardToSegPerfDbFormat(leaderboard);
-      }
-    );
+    return this.getSegmentNumTimesRidden(segmentId).then((numRidden: number) => {
+      if (numRidden === null) return null;
+      return this.getStravaData(`/segments/${segmentId}/leaderboard`, "&following=true").then(
+        leaderboard => {
+          if (leaderboard === null) return null;
+          return this.convertApiLeaderboardToSegPerfDbFormat(leaderboard, numRidden);
+        }
+      );
+    });
+  }
+
+  private getSegmentNumTimesRidden(segmentId: number): Promise<number> {
+    return this.getStravaData(`/segments/${segmentId}`, "").then(segment => {
+      if (segment === null) return null;
+      return segment.athlete_segment_stats.effort_count;
+    });
   }
 
   getRide(rideId: number): Promise<IRideDetails> {
@@ -185,7 +193,10 @@ export class StravaService {
     return this.removeUndefined(dbRide);
   }
 
-  private convertApiLeaderboardToSegPerfDbFormat(leaderboard): ISegPerfPreUpdate {
+  private convertApiLeaderboardToSegPerfDbFormat(
+    leaderboard,
+    numRidden: number
+  ): ISegPerfPreUpdate {
     let mainEntry: ILeaderboardEntry;
     let peopleAbove: string[] = [];
     let peopleBelow: string[] = [];
@@ -215,6 +226,7 @@ export class StravaService {
       people_above: peopleAbove.join(", "),
       people_below: peopleBelow.join(", "),
       rank: mainEntry.rank,
+      num_times_ridden: numRidden,
       num_entries: leaderboard.entries.length,
       pr_date: mainEntry.start_date,
       pr_elapsed_time: mainEntry.elapsed_time,

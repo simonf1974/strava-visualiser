@@ -2,7 +2,6 @@ import { Injectable } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot, CollectionReference } from "@angular/fire/firestore";
 import { BehaviorSubject, Observable } from "rxjs";
 import { firestore, FirebaseError } from "firebase";
-import { mockRides } from "../../assets/model/mock-data";
 import { StravaService } from "./strava.service";
 import {
   IRide,
@@ -58,7 +57,7 @@ export class RidesService {
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number): void {
-    const pageSize = 3;
+    const pageSize = 2;
     const shouldPage = false;
     const maxPages = 6;
     if (page === undefined) page = 1;
@@ -83,74 +82,48 @@ export class RidesService {
   }
 
   private saveRideDetails(rideDetails: IRideDetails): void {
-    const promises: Promise<ISegPerformance>[] = [];
+    console.log(
+      `About to do a batch for ride ${rideDetails.ride.id} with ${rideDetails.segEfforts.length} segments`
+    );
+    this.startBatch(rideDetails.ride.id);
+
+    this.addDataToBatch("rides", rideDetails.ride.id, rideDetails.ride, rideDetails.ride.id);
+
     rideDetails.segEfforts.forEach((segEffort: ISegEffort) => {
-      promises.push(
-        this.getByKeyFromDb("segment_performance", [
-          segEffort.segment_id,
-          rideDetails.ride.athlete_id
-        ])
+      this.addDataToBatch(
+        "segment_performance",
+        [segEffort.segment_id, rideDetails.ride.athlete_id],
+        this.mergeSegEffortAndSegPerf(segEffort, rideDetails.ride.athlete_id),
+
+        rideDetails.ride.id
       );
     });
 
-    Promise.all(promises)
-      .catch(res => {
-        console.log("Error in promise all");
-        console.log(res);
-        return null;
-      })
-      .then((segPerfs: ISegPerformance[]) => {
-        if (segPerfs === null)
-          console.log("res is null, I'm guessing there was an error getting seg perf from the DB");
+    this.addDataToBatch(
+      "ride_seg_efforts",
+      rideDetails.ride.id,
+      { seg_efforts: rideDetails.segEfforts },
+      rideDetails.ride.id
+    );
 
-        if (segPerfs !== null) {
-          console.log(
-            `About to do a batch for ride ${rideDetails.ride.id} with ${rideDetails.segEfforts.length} segments and ${segPerfs.length} seg perf already on the database`
-          );
-          this.startBatch(rideDetails.ride.id);
-
-          this.addDataToBatch("rides", rideDetails.ride.id, rideDetails.ride, rideDetails.ride.id);
-
-          rideDetails.segEfforts.forEach((segEffort: ISegEffort) => {
-            let segPerf: ISegPerformance;
-            segPerfs.forEach(segPerformance => {
-              if (
-                segPerformance !== undefined &&
-                segPerformance.segment_id === segEffort.segment.id
-              )
-                segPerf = segPerformance;
-            });
-
-            this.addDataToBatch(
-              "segment_performance",
-              [segEffort.segment_id, rideDetails.ride.athlete_id],
-              this.mergeSegEffortAndSegPerf(segEffort, segPerf, rideDetails.ride.athlete_id),
-              rideDetails.ride.id
-            );
-
-            // this.addDataToBatch("segment_efforts", segEffort.id, segEffort, rideDetails.ride.id);
-          });
-
-          this.addDataToBatch(
-            "ride_seg_efforts",
-            rideDetails.ride.id,
-            { seg_efforts: rideDetails.segEfforts },
-            rideDetails.ride.id
-          );
-
-          this.endBatch(rideDetails.ride.id);
-        }
-      });
+    this.endBatch(rideDetails.ride.id);
   }
 
   // Logic to refesh perf data with leaderboards
 
   refreshPerformanceData(): void {
+    const segmentsToRefresh: number[] = [];
+
     this.getPerformanceDataToRefresh().subscribe(
       (perfData: ISegPerformance[]) => {
         this.incrementCount("numDbReadsDone");
         perfData.forEach((segPerformance: ISegPerformance) => {
-          if (segPerformance.requires_refresh === true) {
+          if (
+            segPerformance.requires_refresh === true &&
+            !segmentsToRefresh.includes(segPerformance.segment_id)
+          ) {
+            segmentsToRefresh.push(segPerformance.segment_id);
+
             this.stravaService
               .getLeaderboard(segPerformance.segment_id)
               .then((leaderboard: ISegPerfPreUpdate) => {
@@ -236,12 +209,11 @@ export class RidesService {
 
   private getPerformanceDataToRefresh(): Observable<any> {
     this.incrementCount("numDbReadsMade");
-    console.log("Getting seg perf to refresh");
     return this.firestore
       .collection("segment_performance", (ref: CollectionReference) =>
         ref
           .where("requires_refresh", "==", true)
-          .orderBy("num_times_ridden", "desc")
+          // .orderBy("num_times_ridden", "desc")
           .limit(10)
       )
       .valueChanges();
@@ -266,7 +238,6 @@ export class RidesService {
 
   private startBatch(rideId: number): void {
     this.incrementCount("numDbWritesMade");
-    console.log(`Starting batch: ${rideId}`);
     this.batches.set(rideId, [this.firestore.firestore.batch(), 0]);
   }
 
@@ -312,34 +283,9 @@ export class RidesService {
 
   //API to database mapping
 
-  private getSegEffortLastRidden(segEffort, segPerformance): string {
-    if (segPerformance === undefined || segEffort.start_date > segPerformance.last_ridden_date)
-      return segEffort.start_date;
-    else return segPerformance.last_ridden_date;
-  }
-
-  private getSegEffortNumTimesRidden(segPerformance): number {
-    if (segPerformance === undefined) return 1;
-    else return ++segPerformance.num_times_ridden;
-  }
-
-  private getSegEffortRequiresRefresh(segEffort, segPerformance): boolean {
-    return (
-      segPerformance === undefined ||
-      segPerformance.requires_refresh ||
-      segEffort.start_date > segPerformance.last_ridden_date
-    );
-  }
-
-  private mergeSegEffortAndSegPerf(
-    segEffort: ISegEffort,
-    segPerformance: ISegPerformance,
-    athleteId: number
-  ): ISegPerfPreSave {
+  private mergeSegEffortAndSegPerf(segEffort: ISegEffort, athleteId: number): ISegPerfPreSave {
     const segPerf: ISegPerfPreSave = {
-      last_ridden_date: this.getSegEffortLastRidden(segEffort, segPerformance),
-      num_times_ridden: this.getSegEffortNumTimesRidden(segPerformance),
-      requires_refresh: this.getSegEffortRequiresRefresh(segEffort, segPerformance),
+      requires_refresh: true,
       athlete_id: athleteId,
       segment_id: segEffort.segment_id,
       segment: {
