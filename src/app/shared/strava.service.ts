@@ -210,6 +210,10 @@ export class StravaService {
       }
     });
 
+    // if (mainEntry === undefined) {
+    //   console.log("Main entry is undefined for", leaderboard);
+    // }
+
     const dbEntries: ILeaderboardEntry[] = leaderboard.entries.map(entry => {
       const ent: ILeaderboardEntry = {
         athlete_name: entry.athlete_name,
