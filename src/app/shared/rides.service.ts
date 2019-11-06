@@ -185,6 +185,21 @@ export class RidesService {
     // });
   }
 
+  getSegPerformances() {
+    // return new Promise(resolve => {
+    //   resolve(this.adjMock);
+    // });
+    return this.firestore
+      .collection("segment_performance", (ref: CollectionReference) =>
+        ref
+          .where("num_entries", ">", 1)
+          .orderBy("num_times_ridden", "desc")
+          .limit(10)
+      )
+      .valueChanges()
+      .subscribe();
+  }
+
   private getByKeyFromDb(collection: string, key: number | number[]): Promise<any> {
     this.incrementCount("numDbReadsMade");
     return this.firestore
