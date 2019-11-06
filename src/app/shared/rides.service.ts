@@ -57,15 +57,15 @@ export class RidesService {
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number): void {
-    const pageSize = 2;
-    const shouldPage = false;
-    const maxPages = 6;
+    const pageSize = 200;
+    const shouldPage = true;
+    const maxPages = 100;
     if (page === undefined) page = 1;
 
     this.stravaService.getRides(pageSize, page).then((rides: number[]) => {
       console.log(`Got ${rides.length} for page ${page}`);
       rides.forEach((rideId: number) => this.processRide(rideId));
-      if (shouldPage && rides.length !== 0 && page <= maxPages) this.scrapeStravaData(++page);
+      if (shouldPage && rides.length !== 0 && page < maxPages) this.scrapeStravaData(++page);
     });
   }
 
