@@ -23,5 +23,7 @@ export class FirestoreCrudComponent implements OnInit {
     this.ridesService.calls.subscribe(calls => {
       this.calls = calls;
     });
+
+    // this.ridesService.getSegPerformances();
   }
 }

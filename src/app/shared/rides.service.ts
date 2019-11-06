@@ -193,11 +193,20 @@ export class RidesService {
       .collection("segment_performance", (ref: CollectionReference) =>
         ref
           .where("num_entries", ">", 1)
+          .orderBy("num_entries", "desc")
           .orderBy("num_times_ridden", "desc")
-          .limit(10)
+          .limit(2)
       )
-      .valueChanges()
-      .subscribe();
+      .get()
+      .toPromise()
+      .then(res => {
+        console.log(res.docs[0].data());
+        return res.docs.map(segPerfs => segPerfs.data());
+      });
+    // .valueChanges()
+    // .subscribe(segPerfs => {
+    //   return segPerfs;
+    // });
   }
 
   private getByKeyFromDb(collection: string, key: number | number[]): Promise<any> {
