@@ -58,7 +58,7 @@ export class RidesService {
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number): void {
-    const pageSize = 10;
+    const pageSize = 3;
     const shouldPage = false;
     const maxPages = 6;
     if (page === undefined) page = 1;
