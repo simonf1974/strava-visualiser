@@ -210,9 +210,25 @@ export class StravaService {
       }
     });
 
-    // if (mainEntry === undefined) {
-    //   console.log("Main entry is undefined for", leaderboard);
-    // }
+    if (mainEntry === undefined) {
+      console.log("Main entry is undefined for", leaderboard);
+      const dbSegPerfMissing: ISegPerfPreUpdate = {
+        requires_refresh: false,
+        people_above: null,
+        people_below: null,
+        rank: null,
+        num_times_ridden: null,
+        num_entries: null,
+        pr_date: null,
+        pr_elapsed_time: null,
+        pr_moving_time: null,
+        top_date: null,
+        top_elapsed_time: null,
+        top_moving_time: null,
+        entries: null
+      };
+      return dbSegPerfMissing;
+    }
 
     const dbEntries: ILeaderboardEntry[] = leaderboard.entries.map(entry => {
       const ent: ILeaderboardEntry = {
