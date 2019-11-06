@@ -60,8 +60,6 @@ export interface ISegment {
 }
 
 export interface ISegPerfPreSave {
-  // last_ridden_date: string;
-  // num_times_ridden: firestore.FieldValue;
   requires_refresh: boolean;
   athlete_id: number;
   segment_id: number;
@@ -85,7 +83,6 @@ export interface ISegPerfPreUpdate {
 }
 
 export interface ISegPerformance {
-  last_ridden_date: string;
   num_times_ridden: number;
   requires_refresh: boolean;
   athlete_id: number;

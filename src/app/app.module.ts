@@ -24,6 +24,7 @@ import { FirestoreCrudComponent } from "./components/firestore-crud/firestore-cr
 import { HttpClientModule } from "@angular/common/http";
 import { RidesListComponent } from "./components/rides-list/rides-list.component";
 import { RidesChartComponent } from "./components/rides-chart/rides-chart.component";
+import { SegPerfListComponent } from './components/seg-perf-list/seg-perf-list.component';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { RidesChartComponent } from "./components/rides-chart/rides-chart.compon
     GraphComponent,
     FirestoreCrudComponent,
     RidesListComponent,
-    RidesChartComponent
+    RidesChartComponent,
+    SegPerfListComponent
   ],
   imports: [
     BrowserModule,

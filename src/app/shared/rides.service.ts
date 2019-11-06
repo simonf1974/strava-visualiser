@@ -200,7 +200,7 @@ export class RidesService {
       .get()
       .toPromise()
       .then(res => {
-        console.log(res.docs[0].data());
+        // console.log(res.docs[0].data());
         return res.docs.map(segPerfs => segPerfs.data());
       });
     // .valueChanges()
