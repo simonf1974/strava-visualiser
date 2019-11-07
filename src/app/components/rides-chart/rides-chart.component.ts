@@ -2,7 +2,6 @@ import { Component, OnInit, Input } from "@angular/core";
 import { ChartModule } from "primeng/chart";
 import { RidesService } from "src/app/shared/rides.service";
 import { IRide } from "../../model/model";
-import { mockRides } from "../../../assets/model/mock-data";
 
 @Component({
   selector: "app-rides-chart",
@@ -30,47 +29,64 @@ export class RidesChartComponent implements OnInit {
       const distAgg = distance.reduce((newArray: any, ride: any, ind: number) => {
         if (ind === 1) newArray = [];
         const date = ride.x.slice(0, 7);
-        newArray[date] = (newArray[date] || 0) + ride.y;
+        if (newArray[date] === undefined) newArray[date] = [0, 0];
+        newArray[date][0] = (newArray[date][0] || 0) + ride.y;
+        newArray[date][1] = (newArray[date][1] || 0) + 2;
+
         return newArray;
       });
 
+      console.log(distAgg);
+
       const distAggData = Object.entries(distAgg).map(item => {
+        console.log(item);
         return {
           x: item[0],
-          y: Math.floor(Number(item[1]))
+          y: Math.floor(Number(item[1][0])),
+          r: 6
         };
       });
+
+      console.log(distAggData);
 
       const distAggData2 = Object.entries(distAgg).map(item => {
         return {
           x: item[0],
-          y: Math.floor(Number(item[1]) * 2)
+          y: Math.floor(Number(item[1]) * 1.2)
+        };
+      });
+
+      const distAggData3 = Object.entries(distAgg).map(item => {
+        return {
+          x: item[0],
+          y: Math.floor(Number(item[1]) * 1.3)
         };
       });
 
       this.data = {
         // labels: ["January", "February", "March", "April", "May", "June", "July"],
         datasets: [
-          // {
-          //   label: "First Dataset",
-          //   data: [65, 59, 80, 81, 56, 55, 40],
-          //   fill: false,
-          //   borderColor: "red"
-          // },
           {
             label: "Second Dataset",
             data: distAggData,
             // fill: false,
-            fillColor: "blue",
+            backgroundColor: "blue",
             borderColor: "blue"
-          },
-          {
-            label: "First Dataset",
-            data: distAggData2,
-            // fill: false,
-            fillColor: "red",
-            borderColor: "red"
           }
+          // {
+          //   label: "First Dataset",
+          //   data: distAggData2,
+          //   // fill: false,
+          //   backgroundColor: "red",
+          //   borderColor: "red"
+          // },
+          // {
+          //   label: "First Dataset",
+          //   data: distAggData3,
+          //   // fill: false,
+          //   backgroundColor: "green",
+          //   borderColor: "green"
+          // }
         ]
       };
 
@@ -89,16 +105,17 @@ export class RidesChartComponent implements OnInit {
               ticks: {
                 beginAtZero: true
               },
-              stacked: false
+              stacked: true
             }
           ],
           xAxes: [
             {
               type: "time",
               time: {
-                unit: "month"
+                unit: "year"
               },
-              stacked: true
+              stacked: true,
+              offset: true
             }
           ]
         }
