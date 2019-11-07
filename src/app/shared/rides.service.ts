@@ -43,6 +43,10 @@ export class RidesService {
     this.stravaService.propagateMsg.subscribe(msg => {
       if (msg !== null) this.propagateMsg(msg.key, msg.error);
     });
+
+    this.firestore.firestore.settings({
+      cacheSizeBytes: 1000000000000
+    });
   }
 
   private incrementCount(call: string): void {
@@ -177,26 +181,30 @@ export class RidesService {
     // return new Promise(resolve => {
     //   resolve(this.adjMock);
     // });
+
+    // this.firestore.firestore.enablePersistence().then(
+
+    // )
+    // .catch(err => {
+    //   console.log(err.code);
+    // });
     return this.firestore
       .collection("segment_performance", (ref: CollectionReference) =>
         ref
-          .where("num_entries", ">", 1)
-          .orderBy("num_entries", "desc")
+          // .where("num_entries", ">", 1)
+          .where("num_times_ridden", ">", 2)
           .orderBy("num_times_ridden", "desc")
-          .limit(10)
+          .orderBy("num_entries", "desc")
+          .limit(5)
       )
       .get()
       .toPromise()
       .then(res => {
-        // console.log(res.docs[0].data());
         return res.docs.map(segPerfs => {
+          console.log("from cache", segPerfs.metadata.fromCache);
           return this.flattenSegPerf(segPerfs.data() as ISegPerformance);
         });
       });
-    // .valueChanges()
-    // .subscribe(segPerfs => {
-    //   return segPerfs;
-    // });
   }
 
   private getByKeyFromDb(collection: string, key: number | number[]): Promise<any> {

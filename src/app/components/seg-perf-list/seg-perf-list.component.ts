@@ -23,6 +23,8 @@ export class SegPerfListComponent implements OnInit {
 
   ngOnInit() {
     this.ridesService.getSegPerformances().then((segPerfs: ISegPerformanceFlat[]) => {
+      console.log(JSON.stringify(segPerfs));
+
       this.segPerfs = segPerfs;
       this.cols = [
         { field: "segment_name_with_link", header: "Name" },

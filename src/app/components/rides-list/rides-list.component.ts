@@ -22,7 +22,7 @@ export class RidesListComponent implements OnInit {
 
   ngOnInit() {
     this.ridesService.getRides().then((rides: IRide[]) => {
-      console.log(JSON.stringify(rides));
+      // console.log(JSON.stringify(rides));
       this.rides = rides;
       this.cols = [
         { field: "year", header: "Year" },
