@@ -183,7 +183,7 @@ export class RidesService {
           .where("num_entries", ">", 1)
           .orderBy("num_entries", "desc")
           .orderBy("num_times_ridden", "desc")
-          .limit(2)
+          .limit(10)
       )
       .get()
       .toPromise()
@@ -345,7 +345,8 @@ export class RidesService {
       segment_elevation_low: segPerf.segment.elevation_low,
       segment_maximum_grade: segPerf.segment.maximum_grade,
       segment_name: segPerf.segment.name,
-      segment_state: segPerf.segment.state
+      segment_state: segPerf.segment.state,
+      segment_name_with_link: `<span><a href='https://www.strava.com/segments/${segPerf.segment.id}' target='_blank'>${segPerf.segment.name}</a></span>`
     };
   }
 }

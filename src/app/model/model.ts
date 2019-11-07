@@ -108,6 +108,7 @@ export interface ISegPerformanceFlat {
   segment_maximum_grade: number;
   segment_name: string;
   segment_state: string;
+  segment_name_with_link: string;
 }
 
 export interface ISegPerformance {

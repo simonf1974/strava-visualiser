@@ -25,7 +25,7 @@ export class SegPerfListComponent implements OnInit {
     this.ridesService.getSegPerformances().then((segPerfs: ISegPerformanceFlat[]) => {
       this.segPerfs = segPerfs;
       this.cols = [
-        { field: "segment_name", header: "Name" },
+        { field: "segment_name_with_link", header: "Name" },
         { field: "segment_city", header: "City" },
         { field: "num_times_ridden", header: "Times Ridden" },
         { field: "rank", header: "Rank" },
@@ -44,10 +44,5 @@ export class SegPerfListComponent implements OnInit {
         return parseInt(filter) < value;
       };
     });
-  }
-
-  getField(field: string) {
-    console.log(_.get(this.cols, field));
-    return _.get(this.cols, field);
   }
 }
