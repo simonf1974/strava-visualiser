@@ -116,7 +116,8 @@ export class StravaService {
         console.log(
           `Strava API error: HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}, Message: ${res.error.message}`
         );
-        return null;
+        if (res.error.message === "Record Not Found") return res.error.message;
+        else return null;
       });
   }
 
@@ -201,14 +202,16 @@ export class StravaService {
     let peopleAbove: string[] = [];
     let peopleBelow: string[] = [];
 
-    leaderboard.entries.forEach(entry => {
-      if (entry.athlete_name === "Simon F.") mainEntry = entry;
-      else if (mainEntry === undefined) {
-        peopleAbove.push(entry.athlete_name);
-      } else {
-        peopleBelow.push(entry.athlete_name);
-      }
-    });
+    if (leaderboard.entries !== undefined) {
+      leaderboard.entries.forEach(entry => {
+        if (entry.athlete_name === "Simon F.") mainEntry = entry;
+        else if (mainEntry === undefined) {
+          peopleAbove.push(entry.athlete_name);
+        } else {
+          peopleBelow.push(entry.athlete_name);
+        }
+      });
+    }
 
     if (mainEntry === undefined) {
       console.log("Main entry is undefined for", leaderboard);

@@ -23,7 +23,26 @@ export class SegPerfListComponent implements OnInit {
 
   ngOnInit() {
     this.ridesService.getSegPerformances().then((segPerfs: ISegPerformanceFlat[]) => {
-      console.log(JSON.stringify(segPerfs));
+      // console.log(JSON.stringify(segPerfs));
+
+      // console.log(JSON.stringify(segPerfs).length);
+
+      // const segPerfsStr = JSON.stringify(segPerfs);
+      // console.log(segPerfsStr.length);
+
+      // const page1 = Math.floor(segPerfsStr.length / 3);
+      // const page2 = Math.floor(page1 * 2);
+
+      // localStorage.setItem("segPerf1", segPerfsStr.slice(0, page1));
+      // localStorage.setItem("segPerf2", segPerfsStr.slice(page1, page2));
+      // localStorage.setItem("segPerf3", segPerfsStr.slice(page2, segPerfsStr.length));
+
+      // const segPerfsStr2 = `${localStorage.getItem("segPerf1")}${localStorage.getItem(
+      //   "segPerf2"
+      // )}${localStorage.getItem("segPerf3")}`;
+      // console.log(segPerfsStr2.length);
+      // console.log(segPerfsStr2);
+      // this.segPerfs = JSON.parse(segPerfsStr2);
 
       this.segPerfs = segPerfs;
       this.cols = [

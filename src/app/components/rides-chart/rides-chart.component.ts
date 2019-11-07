@@ -41,6 +41,13 @@ export class RidesChartComponent implements OnInit {
         };
       });
 
+      const distAggData2 = Object.entries(distAgg).map(item => {
+        return {
+          x: item[0],
+          y: Math.floor(Number(item[1]) * 2)
+        };
+      });
+
       this.data = {
         // labels: ["January", "February", "March", "April", "May", "June", "July"],
         datasets: [
@@ -53,8 +60,16 @@ export class RidesChartComponent implements OnInit {
           {
             label: "Second Dataset",
             data: distAggData,
-            fill: false,
+            // fill: false,
+            fillColor: "blue",
             borderColor: "blue"
+          },
+          {
+            label: "First Dataset",
+            data: distAggData2,
+            // fill: false,
+            fillColor: "red",
+            borderColor: "red"
           }
         ]
       };
@@ -73,7 +88,8 @@ export class RidesChartComponent implements OnInit {
             {
               ticks: {
                 beginAtZero: true
-              }
+              },
+              stacked: false
             }
           ],
           xAxes: [
@@ -81,7 +97,8 @@ export class RidesChartComponent implements OnInit {
               type: "time",
               time: {
                 unit: "month"
-              }
+              },
+              stacked: true
             }
           ]
         }

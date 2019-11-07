@@ -44,9 +44,9 @@ export class RidesService {
       if (msg !== null) this.propagateMsg(msg.key, msg.error);
     });
 
-    this.firestore.firestore.settings({
-      cacheSizeBytes: 1000000000000
-    });
+    localStorage.setItem("hh", "hf");
+
+    console.log(localStorage.getItem("hh"));
   }
 
   private incrementCount(call: string): void {
@@ -178,16 +178,6 @@ export class RidesService {
   }
 
   getSegPerformances() {
-    // return new Promise(resolve => {
-    //   resolve(this.adjMock);
-    // });
-
-    // this.firestore.firestore.enablePersistence().then(
-
-    // )
-    // .catch(err => {
-    //   console.log(err.code);
-    // });
     return this.firestore
       .collection("segment_performance", (ref: CollectionReference) =>
         ref
@@ -201,7 +191,6 @@ export class RidesService {
       .toPromise()
       .then(res => {
         return res.docs.map(segPerfs => {
-          console.log("from cache", segPerfs.metadata.fromCache);
           return this.flattenSegPerf(segPerfs.data() as ISegPerformance);
         });
       });

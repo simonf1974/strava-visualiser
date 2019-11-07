@@ -24,6 +24,10 @@ export class FirestoreCrudComponent implements OnInit {
       this.calls = calls;
     });
 
+    localStorage.setItem("hh", "hf");
+
+    console.log(localStorage.getItem("hh"));
+
     // this.ridesService.getSegPerformances();
   }
 }
