@@ -9,8 +9,10 @@ import {
   IRideDetails,
   ISegEffort,
   ISegPerfPreUpdate,
-  ISegPerfPreSave
+  ISegPerfPreSave,
+  ISegPerformanceFlat
 } from "../model/model";
+import { mockRides } from "src/assets/model/mock-data";
 
 @Injectable({
   providedIn: "root"
@@ -27,7 +29,6 @@ export class RidesService {
     databaseMsg: ""
   };
   calls: BehaviorSubject<any>;
-  adjMock: IRide[];
 
   private batches: Map<number, [firestore.WriteBatch, number]> = new Map<
     number,
@@ -160,7 +161,7 @@ export class RidesService {
 
   getRides(): Promise<IRide[]> {
     return new Promise(resolve => {
-      resolve(this.adjMock);
+      resolve(mockRides);
     });
 
     // return this.firestore
@@ -168,21 +169,8 @@ export class RidesService {
     //   .get()
     //   .toPromise()
     //   .then(res => {
-    //     // console.log(res.docs);
-    //     return res.docs.map(ride => ride.data());
+    //     return res.docs.map(ride => ride.data() as IRide);
     //   });
-
-    // .catch((res: FirebaseError) => {
-    //   this.incrementCount("numDbReadsDone");
-    //   this.propagateMsg(
-    //     "databaseMsg",
-    //     `Database error in get by key: Code: ${res.code}, Message: ${res.message}`
-    //   );
-    //   console.log(
-    //     `Database error: Code: ${res.code}, Message: ${res.message}`
-    //   );
-    //   return null;
-    // });
   }
 
   getSegPerformances() {
@@ -201,7 +189,9 @@ export class RidesService {
       .toPromise()
       .then(res => {
         // console.log(res.docs[0].data());
-        return res.docs.map(segPerfs => segPerfs.data());
+        return res.docs.map(segPerfs => {
+          return this.flattenSegPerf(segPerfs.data() as ISegPerformance);
+        });
       });
     // .valueChanges()
     // .subscribe(segPerfs => {
@@ -327,5 +317,35 @@ export class RidesService {
       }
     };
     return JSON.parse(JSON.stringify(segPerf));
+  }
+
+  private flattenSegPerf(segPerf: ISegPerformance): ISegPerformanceFlat {
+    return {
+      num_times_ridden: segPerf.num_times_ridden,
+      requires_refresh: segPerf.requires_refresh,
+      athlete_id: segPerf.athlete_id,
+      segment_id: segPerf.segment_id,
+      people_above: segPerf.people_above,
+      people_below: segPerf.people_below,
+      rank: segPerf.rank,
+      num_entries: segPerf.num_entries,
+      pr_date: segPerf.pr_date,
+      pr_elapsed_time: segPerf.pr_elapsed_time,
+      pr_moving_time: segPerf.pr_moving_time,
+      top_date: segPerf.top_date,
+      top_elapsed_time: segPerf.top_elapsed_time,
+      top_moving_time: segPerf.top_moving_time,
+      entries: segPerf.entries,
+      segment_average_grade: segPerf.segment.average_grade,
+      segment_city: segPerf.segment.city,
+      segment_climb_category: segPerf.segment.climb_category,
+      segment_country: segPerf.segment.country,
+      segment_distance: segPerf.segment.distance,
+      segment_elevation_high: segPerf.segment.elevation_high,
+      segment_elevation_low: segPerf.segment.elevation_low,
+      segment_maximum_grade: segPerf.segment.maximum_grade,
+      segment_name: segPerf.segment.name,
+      segment_state: segPerf.segment.state
+    };
   }
 }

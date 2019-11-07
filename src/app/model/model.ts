@@ -82,12 +82,11 @@ export interface ISegPerfPreUpdate {
   entries: ILeaderboardEntry[];
 }
 
-export interface ISegPerformance {
+export interface ISegPerformanceFlat {
   num_times_ridden: number;
   requires_refresh: boolean;
   athlete_id: number;
   segment_id: number;
-  segment: ISegment;
   people_above: string;
   people_below: string;
   rank: number;
@@ -99,6 +98,35 @@ export interface ISegPerformance {
   top_elapsed_time: number;
   top_moving_time: number;
   entries: ILeaderboardEntry[];
+  segment_average_grade: number;
+  segment_city: string;
+  segment_climb_category: number;
+  segment_country: string;
+  segment_distance: number;
+  segment_elevation_high: number;
+  segment_elevation_low: number;
+  segment_maximum_grade: number;
+  segment_name: string;
+  segment_state: string;
+}
+
+export interface ISegPerformance {
+  num_times_ridden: number;
+  requires_refresh: boolean;
+  athlete_id: number;
+  segment_id: number;
+  people_above: string;
+  people_below: string;
+  rank: number;
+  num_entries: number;
+  pr_date: string;
+  pr_elapsed_time: number;
+  pr_moving_time: number;
+  top_date: string;
+  top_elapsed_time: number;
+  top_moving_time: number;
+  entries: ILeaderboardEntry[];
+  segment: ISegment;
 }
 
 export interface ILeaderboardEntry {

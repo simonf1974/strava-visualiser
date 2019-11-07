@@ -1,7 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
 import { RidesService } from "src/app/shared/rides.service";
-import { ISegPerformance } from "../../model/model";
+import { ISegPerformance, ISegPerformanceFlat } from "../../model/model";
 import { TableModule } from "primeng/table";
 import { MultiSelectModule } from "primeng/multiselect";
 import { InputTextModule } from "primeng/inputtext";
@@ -15,21 +15,21 @@ import * as _ from "lodash";
   styleUrls: ["./seg-perf-list.component.scss"]
 })
 export class SegPerfListComponent implements OnInit {
-  segPerfs: ISegPerformance[];
+  segPerfs: ISegPerformanceFlat[];
   cols: any[];
   selectedColumns: any[];
 
   constructor(private ridesService: RidesService) {}
 
   ngOnInit() {
-    this.ridesService.getSegPerformances().then((segPerfs: ISegPerformance[]) => {
+    this.ridesService.getSegPerformances().then((segPerfs: ISegPerformanceFlat[]) => {
       this.segPerfs = segPerfs;
       this.cols = [
-        { field: "segment.name", header: "Name" },
-        { field: "segment.city", header: "City" },
+        { field: "segment_name", header: "Name" },
+        { field: "segment_city", header: "City" },
         { field: "num_times_ridden", header: "Times Ridden" },
         { field: "rank", header: "Rank" },
-        { field: "segment.average_grade", header: "Avg Grade" },
+        { field: "segment_average_grade", header: "Avg Grade" },
         { field: "people_above", header: "People Above" },
         { field: "people_below", header: "People Below" },
         { field: "pr_date", header: "PR Date" },

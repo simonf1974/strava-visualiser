@@ -22,11 +22,12 @@ export class RidesListComponent implements OnInit {
 
   ngOnInit() {
     this.ridesService.getRides().then((rides: IRide[]) => {
+      console.log(JSON.stringify(rides));
       this.rides = rides;
       this.cols = [
         { field: "year", header: "Year" },
         { field: "month", header: "Month" },
-        { field: "start_date_local", header: "Date" },
+        { field: "start_date", header: "Date" },
         { field: "name", header: "Name" },
         { field: "distance", header: "Distance (km)" },
         { field: "moving_time", header: "Time (hrs)" },
