@@ -12,18 +12,54 @@ export class Rides {
     return this._rides;
   }
 
+  getRideAvgSpeedByYear(): IChartPoint[] {
+    const calcWeightedAvgSpeed = (
+      currentDistance: number,
+      currentAvgSpeed: number,
+      newDistance: number,
+      newAverageSpeed: number
+    ) => {
+      if (currentAvgSpeed === 0) return newAverageSpeed;
+      const currAvg = currentDistance * currentAvgSpeed;
+      const newAvg = newDistance * newAverageSpeed;
+      const totalDist = currentDistance + newDistance;
+      const newAvg2 = (currAvg + newAvg) / totalDist;
+      return newAvg2;
+    };
+
+    const avgSpeedByYear = this.rides.reduce((newArray: any, ride: Ride, ind: number) => {
+      if (ind === 1) newArray = [];
+      const date = ride.start_date.slice(0, 4);
+      if (newArray[date] === undefined) newArray[date] = [0, 0];
+      newArray[date][0] = calcWeightedAvgSpeed(
+        newArray[date][1],
+        newArray[date][0],
+        ride.distance,
+        ride.average_speed
+      );
+      newArray[date][1] = (newArray[date][0] || 0) + ride.distance;
+
+      return newArray;
+    });
+
+    const avgSpeedByYearData = Object.entries(avgSpeedByYear).map(item => {
+      return {
+        x: item[0],
+        y: Math.floor(item[1][0] * 10) / 10
+      };
+    });
+
+    return avgSpeedByYearData;
+  }
+
   getRidesByMonth(): IChartPoint[] {
     const distAgg = this.rides.reduce((newArray: any, ride: Ride, ind: number) => {
       if (ind === 1) newArray = [];
       const date = ride.start_date.slice(0, 7);
       if (newArray[date] === undefined) newArray[date] = [0, 0];
       newArray[date][0] = (newArray[date][0] || 0) + ride.distance;
-      // newArray[date][1] = (newArray[date][1] || 0) + 2;
-
       return newArray;
     });
-
-    console.log(distAgg);
 
     const distAggData = Object.entries(distAgg).map(item => {
       return {
@@ -43,7 +79,6 @@ export class Rides {
           item.x = item.x.slice(0, 4);
           return item;
         });
-      console.log(month);
       aggData.push(month);
     }
 
