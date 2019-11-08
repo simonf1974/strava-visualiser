@@ -1,4 +1,4 @@
-import { IRide, IChartsPoint } from "./model";
+import { IRide, IChartPoint } from "./model";
 
 export class Rides {
   private _rides: Ride[];
@@ -12,52 +12,49 @@ export class Rides {
     return this._rides;
   }
 
-  getRidesByMonth(): IChartsPoint[] {
-    const distance = this.rides.map((ride: IRide) => {
-      return {
-        x: ride.start_date,
-        y: ride.distance
-      };
-    });
-
-    const distAgg = distance.reduce((newArray: any, ride: any, ind: number) => {
+  getRidesByMonth(): IChartPoint[] {
+    const distAgg = this.rides.reduce((newArray: any, ride: Ride, ind: number) => {
       if (ind === 1) newArray = [];
-      const date = ride.x.slice(0, 7);
+      const date = ride.start_date.slice(0, 7);
       if (newArray[date] === undefined) newArray[date] = [0, 0];
-      newArray[date][0] = (newArray[date][0] || 0) + ride.y;
-      newArray[date][1] = (newArray[date][1] || 0) + 2;
+      newArray[date][0] = (newArray[date][0] || 0) + ride.distance;
+      // newArray[date][1] = (newArray[date][1] || 0) + 2;
 
       return newArray;
     });
 
-    // console.log(distAgg);
+    console.log(distAgg);
 
     const distAggData = Object.entries(distAgg).map(item => {
-      // console.log(item);
       return {
         x: item[0],
-        y: Math.floor(Number(item[1][0]))
-        // r: 6
+        y: Math.floor(item[1][0])
       };
     });
 
-    return distAggData;
+    const aggData = [];
+    for (let i = 1; i <= 12; i++) {
+      const iLeading = ("00" + i).slice(-2);
+      const month = distAggData
+        .filter((item: IChartPoint) => {
+          return item.x.includes("-" + iLeading);
+        })
+        .map((item: IChartPoint) => {
+          item.x = item.x.slice(0, 4);
+          return item;
+        });
+      console.log(month);
+      aggData.push(month);
+    }
 
-    // console.log(distAggData);
+    aggData.forEach(month => {
+      for (let i = 2009; i <= 2019; i++) {
+        if (month.find(year => year.x == i) === undefined) month.push({ x: i.toString(), y: 0 });
+      }
+      month.sort((a, b) => (a.x > b.x ? 1 : b.x > a.x ? -1 : 0));
+    });
 
-    // const distAggData2 = Object.entries(distAgg).map(item => {
-    //   return {
-    //     x: item[0],
-    //     y: Math.floor(Number(item[1]) * 1.2)
-    //   };
-    // });
-
-    // const distAggData3 = Object.entries(distAgg).map(item => {
-    //   return {
-    //     x: item[0],
-    //     y: Math.floor(Number(item[1]) * 1.3)
-    //   };
-    // });
+    return aggData;
   }
 }
 

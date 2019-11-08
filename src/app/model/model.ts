@@ -138,7 +138,7 @@ export interface ILeaderboardEntry {
   rank: number;
 }
 
-export interface IChartsPoint {
+export interface IChartPoint {
   x: string;
   y: number;
   r?: number;

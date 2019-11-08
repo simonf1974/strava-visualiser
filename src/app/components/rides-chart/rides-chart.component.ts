@@ -26,26 +26,89 @@ export class RidesChartComponent implements OnInit {
         // labels: ["January", "February", "March", "April", "May", "June", "July"],
         datasets: [
           {
-            label: "Monthly Distances",
-            data: distAggData,
+            label: "Jan",
+            data: distAggData[0],
             // fill: false,
             backgroundColor: "blue",
             borderColor: "blue"
+          },
+          {
+            label: "Feb",
+            data: distAggData[1],
+            // fill: false,
+            backgroundColor: "red",
+            borderColor: "red"
+          },
+          {
+            label: "Mar",
+            data: distAggData[2],
+            // fill: false,
+            backgroundColor: "blue",
+            borderColor: "blue"
+          },
+          {
+            label: "Apr",
+            data: distAggData[3],
+            // fill: false,
+            backgroundColor: "red",
+            borderColor: "red"
+          },
+          {
+            label: "May",
+            data: distAggData[4],
+            // fill: false,
+            backgroundColor: "blue",
+            borderColor: "blue"
+          },
+          {
+            label: "Jun",
+            data: distAggData[5],
+            // fill: false,
+            backgroundColor: "red",
+            borderColor: "red"
+          },
+          {
+            label: "Jul",
+            data: distAggData[6],
+            // fill: false,
+            backgroundColor: "blue",
+            borderColor: "blue"
+          },
+          {
+            label: "Aug",
+            data: distAggData[7],
+            // fill: false,
+            backgroundColor: "red",
+            borderColor: "red"
+          },
+          {
+            label: "Sep",
+            data: distAggData[8],
+            // fill: false,
+            backgroundColor: "blue",
+            borderColor: "blue"
+          },
+          {
+            label: "Oct",
+            data: distAggData[9],
+            // fill: false,
+            backgroundColor: "red",
+            borderColor: "red"
+          },
+          {
+            label: "Nov",
+            data: distAggData[10],
+            // fill: false,
+            backgroundColor: "blue",
+            borderColor: "blue"
+          },
+          {
+            label: "Dec",
+            data: distAggData[11],
+            // fill: false,
+            backgroundColor: "red",
+            borderColor: "red"
           }
-          // {
-          //   label: "First Dataset",
-          //   data: distAggData2,
-          //   // fill: false,
-          //   backgroundColor: "red",
-          //   borderColor: "red"
-          // },
-          // {
-          //   label: "First Dataset",
-          //   data: distAggData3,
-          //   // fill: false,
-          //   backgroundColor: "green",
-          //   borderColor: "green"
-          // }
         ]
       };
 

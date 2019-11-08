@@ -22,23 +22,6 @@ export class RidesListComponent implements OnInit {
 
   ngOnInit() {
     this.ridesService.getRides().then((rides: Rides) => {
-      // console.log(JSON.stringify(rides));
-
-      // const r: Ride = Object.assign(new Ride(), rides[0]);
-      // const r2: Ride = Object.assign(new Ride(), rides[1]);
-
-      // const ra: Ride[] = Object.assign(new Ride(), rides);
-      // console.log(ra);
-      // console.log(ra[0]);
-
-      // console.log(r.getYearTimesTwo());
-
-      // const rs = JSON.stringify([r, r2]);
-
-      // console.log(rs);
-
-      // console.log(rides.rides);
-
       this.rides = rides;
       this.cols = [
         { field: "year", header: "Year" },
