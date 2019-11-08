@@ -1,54 +1,29 @@
-<p-table
-  #dt
-  [columns]="selectedColumns"
-  [value]="rides"
-  sortMode="multiple"
-  [paginator]="true"
-  [rows]="20"
-  [resizableColumns]="true"
-  [reorderableColumns]="true"
-  class="tdLessPadding"
->
+<p-table #dt [columns]="selectedColumns" [value]="rides.rides" sortMode="multiple" [paginator]="true" [rows]="20"
+  [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding">
   <ng-template pTemplate="caption">
     <div class="caption-container">
       <div style="text-align:left">
-        <p-multiSelect
-          [options]="cols"
-          [(ngModel)]="selectedColumns"
-          optionLabel="header"
-          selectedItemsLabel="{0} columns selected"
-          [style]="{ minWidth: '200px' }"
-          defaultLabel="Choose Columns"
-        ></p-multiSelect>
+        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+          selectedItemsLabel="{0} columns selected" [style]="{ minWidth: '200px' }" defaultLabel="Choose Columns">
+        </p-multiSelect>
       </div>
 
       <div style="text-align: right">
         <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
-        <input
-          type="text"
-          pInputText
-          size="50"
-          placeholder="Global Filter"
-          (input)="dt.filterGlobal($event.target.value, 'contains')"
-          style="width:auto"
-        />
+        <input type="text" pInputText size="50" placeholder="Global Filter"
+          (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto" />
       </div>
     </div>
   </ng-template>
 
   <ng-template pTemplate="summary">
-    There are {{ rides?.length }} rides
+    There are {{ rides.rides.length }} rides
   </ng-template>
 
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
-      <th
-        class="table-header"
-        *ngFor="let col of columns"
-        [pSortableColumn]="col.field"
-        pResizableColumn
-        pReorderableColumn
-      >
+      <th class="table-header" *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn
+        pReorderableColumn>
         {{ col.header }}
         <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
@@ -56,55 +31,24 @@
 
     <tr>
       <th *ngFor="let col of columns" [ngSwitch]="col.field">
-        <input
-          *ngSwitchCase="'year'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
-        <input
-          *ngSwitchCase="'month'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
+        <input *ngSwitchCase="'year'" pInputText type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')" />
+        <input *ngSwitchCase="'month'" pInputText type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')" />
 
-        <input
-          *ngSwitchCase="'start_date_local'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
-        <input
-          *ngSwitchCase="'name'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
+        <input *ngSwitchCase="'start_date'" pInputText type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')" />
+        <input *ngSwitchCase="'name'" pInputText type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')" />
 
-        <input
-          *ngSwitchCase="'distance'"
-          pInputText
-          type="text"
-          placeholder="Greater Than"
-          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
-        />
+        <input *ngSwitchCase="'distance'" pInputText type="text" placeholder="Greater Than"
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')" />
 
-        <input
-          *ngSwitchCase="'moving_time'"
-          pInputText
-          type="text"
-          placeholder="Greater Than"
-          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
-        />
+        <input *ngSwitchCase="'moving_time'" pInputText type="text" placeholder="Greater Than"
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')" />
 
-        <input
-          *ngSwitchCase="'average_speed'"
-          pInputText
-          type="text"
-          placeholder="Greater Than"
-          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
-        />
+        <input *ngSwitchCase="'average_speed'" pInputText type="text" placeholder="Greater Than"
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')" />
       </th>
     </tr>
   </ng-template>

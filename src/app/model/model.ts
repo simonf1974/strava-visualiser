@@ -137,3 +137,9 @@ export interface ILeaderboardEntry {
   start_date: string;
   rank: number;
 }
+
+export interface IChartsPoint {
+  x: string;
+  y: number;
+  r?: number;
+}

@@ -13,6 +13,7 @@ import {
   ISegPerformanceFlat
 } from "../model/model";
 import { mockRides } from "src/assets/model/mock-data";
+import { Rides } from "../model/ride";
 
 @Injectable({
   providedIn: "root"
@@ -163,9 +164,9 @@ export class RidesService {
 
   // Database access
 
-  getRides(): Promise<IRide[]> {
+  getRides(): Promise<Rides> {
     return new Promise(resolve => {
-      resolve(mockRides);
+      resolve(new Rides(mockRides));
     });
 
     // return this.firestore
