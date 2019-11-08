@@ -9,6 +9,7 @@ import { AngularFontAwesomeModule } from "angular-font-awesome";
 import { InputTextModule } from "primeng/inputtext";
 import { DropdownModule } from "primeng/dropdown";
 import { ChartModule } from "primeng/chart";
+import { OrganizationChartModule } from "primeng/organizationchart";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -24,8 +25,8 @@ import { FirestoreCrudComponent } from "./components/firestore-crud/firestore-cr
 import { HttpClientModule } from "@angular/common/http";
 import { RidesListComponent } from "./components/rides-list/rides-list.component";
 import { RidesChartComponent } from "./components/rides-chart/rides-chart.component";
-import { SegPerfListComponent } from './components/seg-perf-list/seg-perf-list.component';
-import { NavBarComponent } from './components/nav-bar/nav-bar.component';
+import { SegPerfListComponent } from "./components/seg-perf-list/seg-perf-list.component";
+import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
 
 @NgModule({
   declarations: [
@@ -50,7 +51,8 @@ import { NavBarComponent } from './components/nav-bar/nav-bar.component';
     InputTextModule,
     DropdownModule,
     FormsModule,
-    ChartModule
+    ChartModule,
+    OrganizationChartModule
   ],
   providers: [RidesService, StravaService],
   bootstrap: [AppComponent]

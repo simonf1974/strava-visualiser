@@ -15,4 +15,82 @@
 <p>{{ calls["httpDetails"] }}</p>
 <p>{{ calls["databaseMsg"] }}</p>
 
-<!-- <p>{{ rides }}</p> -->
+<!-- <div class="container">
+  <div class="row"> -->
+<!-- <div class="card-group"> -->
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="card-deck">
+      <div class="card  p-3 m-3">
+        <h5 class="card-title">Step 1 (Strava API)</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Get list of rides from Strava API</h6>
+        <p class="card-text">
+          Returns summary information for all activities. Used to get complete list of all activity
+          IDs.
+        </p>
+        <a
+          href="https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities"
+          target="_blank"
+          class="card-link"
+          >Strava API Documentation</a
+        >
+      </div>
+
+      <!-- <div class="col-sm-12 col-lg-6"> -->
+      <div class="card  p-3 m-3">
+        <!-- <div class="card-body"> -->
+        <h5 class="card-title">Step 2 (DB Read)</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Check if ride is in the Firestore DB</h6>
+        <p class="card-text">
+          For each activity returned, check if that activity is a ride (as opposed to a run or gym
+          workout) and then make a call to the Firestore database to see if this ride has already
+          been saved.
+        </p>
+      </div>
+
+      <div class="card  p-3 m-3">
+        <h5 class="card-title">Step 3 (Strava API)</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Get Ride details for unsaved rides</h6>
+        <p class="card-text">
+          For each ride that had not been previously saved in the Firestore DB, get ride details
+          (including all segments ridden) from the Strava API.
+        </p>
+        <a
+          href="https://developers.strava.com/docs/reference/#api-Activities-getActivityById"
+          target="_blank"
+          class="card-link"
+          >Strava API Documentation</a
+        >
+      </div>
+
+      <div class="card p-3 m-3">
+        <h5 class="card-title">Step 4 (DB Batch Write)</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Save ride and ride segments</h6>
+        <p class="card-text">
+          For each ride returned from the API in the previous step save the following in a
+          transactional batch: the ride, the ride segment efforts and a segment performance
+          placeholder for each segment (c. 50-300 per ride).
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h4>Refresh Performance Data</h4>
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="card-deck">
+      <div class="card m-3 p-3">
+        <h5 class="card-title">Step 4 (DB Batch Write)</h5>
+        <h6 class="card-subtitle mb-2 text-muted">Save ride and ride's segments</h6>
+        <p class="card-text">
+          For each ride returned from the API in the previous step save the following in a
+          transactional batch: the ride, the ride segment efforts and a segment performance
+          placeholder for each segment (c. 50-300 per ride).
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
