@@ -25,6 +25,7 @@ import { HttpClientModule } from "@angular/common/http";
 import { RidesListComponent } from "./components/rides-list/rides-list.component";
 import { RidesChartComponent } from "./components/rides-chart/rides-chart.component";
 import { SegPerfListComponent } from './components/seg-perf-list/seg-perf-list.component';
+import { NavBarComponent } from './components/nav-bar/nav-bar.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import { SegPerfListComponent } from './components/seg-perf-list/seg-perf-list.c
     FirestoreCrudComponent,
     RidesListComponent,
     RidesChartComponent,
-    SegPerfListComponent
+    SegPerfListComponent,
+    NavBarComponent
   ],
   imports: [
     BrowserModule,

@@ -67,7 +67,7 @@ export class RidesChartComponent implements OnInit {
         // labels: ["January", "February", "March", "April", "May", "June", "July"],
         datasets: [
           {
-            label: "Second Dataset",
+            label: "Monthly Distances",
             data: distAggData,
             // fill: false,
             backgroundColor: "blue",
@@ -93,7 +93,7 @@ export class RidesChartComponent implements OnInit {
       this.options = {
         title: {
           display: true,
-          text: "My Title",
+          text: "Ride Distances by Month",
           fontSize: 16
         },
         legend: {
@@ -103,7 +103,10 @@ export class RidesChartComponent implements OnInit {
           yAxes: [
             {
               ticks: {
-                beginAtZero: true
+                beginAtZero: true,
+                callback: function(label, index, labels) {
+                  return label.toLocaleString() + " km";
+                }
               },
               stacked: true
             }

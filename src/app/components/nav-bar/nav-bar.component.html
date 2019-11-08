@@ -1,0 +1,19 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <a class="navbar-brand" routerLink="" [class.active]="isActive('rides-chart')"
+    (click)="setActive('rides-chart')">Strava Visualiser</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+      <a class="nav-item nav-link" [class.active]="isActive('rides-chart')" (click)="setActive('rides-chart')"
+        routerLink="rides-chart">Rides Chart</a>
+      <a class="nav-item nav-link" [class.active]="isActive('rides-list')" (click)="setActive('rides-list')"
+        routerLink="rides-list">Rides List</a>
+      <a class="nav-item nav-link" [class.active]="isActive('seg-perf-list')" (click)="setActive('seg-perf-list')"
+        routerLink="seg-perf-list">Seg Perf List</a>
+      <a class="nav-item nav-link" [class.active]="isActive('strava-scrape')" (click)="setActive('strava-scrape')"
+        routerLink="strava-scrape">Strava Scrape</a>
+    </div>
+  </div>
+</nav>

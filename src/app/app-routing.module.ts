@@ -10,7 +10,7 @@ const routes: Routes = [
   { path: "rides-chart", component: RidesChartComponent },
   { path: "rides-list", component: RidesListComponent },
   { path: "seg-perf-list", component: SegPerfListComponent },
-  { path: "", redirectTo: "/strava-scrape", pathMatch: "full" }
+  { path: "", redirectTo: "/rides-chart", pathMatch: "full" }
 ];
 
 @NgModule({
