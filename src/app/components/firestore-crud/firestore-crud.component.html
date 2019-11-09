@@ -1,102 +1,195 @@
-<!-- <button (click)="addData()">Add Data</button> -->
+<!-- <h3 class="mt-3">Scrape Strava Data</h3> -->
 
-<!-- <button (click)="getData()">Get Data</button> -->
+<p-toolbar>
+  <div class="d-flex justify-content-center m-2">
+    <p-button class="mr-3" (click)="scrapeStravaData()" label="Persist new Strava Rides"></p-button>
 
-<button (click)="scrapeStravaData()">Persist new Strava Rides</button>
+    <p-button (click)="refreshPerformanceData()" label="Refresh Performance Data"></p-button>
+  </div>
 
-<button (click)="refreshPerformanceData()">Refresh Performance Data</button>
+  <div class="container-fluid d-flex justify-content-center ">
+    <div class="row">
+      <div class="card-deck">
+        <div class="card  p-3 m-3">
+          <img
+            src="assets/images/strava-icon-orange.jpg"
+            class="card-img-top mb-2 progress-img"
+            alt="..."
+          />
 
-<p>numStravaApiCallsMade: {{ calls["numStravaApiCallsMade"] }}</p>
-<p>numStravaApiCallsDone: {{ calls["numStravaApiCallsDone"] }}</p>
-<p>numDbReadsMade: {{ calls["numDbReadsMade"] }}</p>
-<p>numDbReadsDone: {{ calls["numDbReadsDone"] }}</p>
-<p>numDbWritesMade: {{ calls["numDbWritesMade"] }}</p>
-<p>numDbWritesDone: {{ calls["numDbWritesDone"] }}</p>
-<p>{{ calls["httpDetails"] }}</p>
-<p>{{ calls["databaseMsg"] }}</p>
+          <h5 class="card-title">API Calls</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ apiCallsMessage }}</h6>
+          <p-progressBar [value]="apiCallsProgress" unit="%"></p-progressBar>
+        </div>
 
-<p-progressBar [showValue]="showValue" [value]="value" unit=" 4 reads"></p-progressBar>
+        <div class="card  p-3 m-3">
+          <img
+            src="assets/images/cloud-firestore-icon.png"
+            class="card-img-top mb-2 progress-img"
+            alt="..."
+          />
+          <h5 class="card-title">DB Reads</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ dbReadsMessage }}</h6>
+          <p-progressBar [value]="dbReadsProgress" unit="%"></p-progressBar>
+        </div>
 
-<h3 class="mt-3">Persist New Strava Rides</h3>
-
-<div class="container-fluid">
-  <div class="row">
-    <div class="card-deck">
-      <div class="card  p-3 m-3">
-        <img src="assets/images/strava-bike-landscape.png" class="card-img-top mb-2" alt="..." />
-
-        <h5 class="card-title">Step 1 (Strava API)</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Get list of rides from Strava API</h6>
-        <p class="card-text">
-          Returns summary information for all activities. Used to get complete list of all activity
-          IDs.
-        </p>
-        <a
-          href="https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities"
-          target="_blank"
-          class="card-link"
-          >Strava API Documentation</a
-        >
-      </div>
-
-      <div class="card  p-3 m-3">
-        <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
-
-        <h5 class="card-title">Step 2 (DB Read)</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Check if ride is in the Firestore DB</h6>
-        <p class="card-text">
-          For each activity returned, check if that activity is a ride (as opposed to a run or gym
-          workout) and then make a call to the Firestore database to see if this ride has already
-          been saved.
-        </p>
-      </div>
-
-      <div class="card  p-3 m-3">
-        <img src="assets/images/strava-bike-landscape.png" class="card-img-top mb-2" alt="..." />
-
-        <h5 class="card-title">Step 3 (Strava API)</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Get Ride details for unsaved rides</h6>
-        <p class="card-text">
-          For each ride that had not been previously saved in the Firestore DB, get ride details
-          (including all segments ridden) from the Strava API.
-        </p>
-        <a
-          href="https://developers.strava.com/docs/reference/#api-Activities-getActivityById"
-          target="_blank"
-          class="card-link"
-          >Strava API Documentation</a
-        >
-      </div>
-
-      <div class="card p-3 m-3">
-        <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
-
-        <h5 class="card-title">Step 4 (DB Batch Write)</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Save ride and ride segments</h6>
-        <p class="card-text">
-          For each ride returned from the API in the previous step save the following in a
-          transactional batch: the ride, the ride segment efforts and a segment performance
-          placeholder for each segment (c. 50-300 per ride).
-        </p>
+        <div class="card  p-3 m-3">
+          <img
+            src="assets/images/cloud-firestore-icon.png"
+            class="card-img-top mb-2 progress-img"
+            alt="..."
+          />
+          <h5 class="card-title">DB Writes</h5>
+          <h6 class="card-subtitle mb-2 text-muted">{{ dbWritesMessage }}</h6>
+          <p-progressBar [value]="dbWritesProgress" unit="%"></p-progressBar>
+        </div>
       </div>
     </div>
   </div>
-</div>
+</p-toolbar>
 
-<h3 class="mt-3">Refresh Performance Data</h3>
+<!-- <p>{{ calls["httpDetails"] }}</p>
+<p>{{ calls["databaseMsg"] }}</p> -->
 
-<div class="container-fluid">
-  <div class="row">
-    <div class="card-deck">
-      <div class="card m-3 p-3">
-        <h5 class="card-title">Step 4 (DB Batch Write)</h5>
-        <h6 class="card-subtitle mb-2 text-muted">Save ride and ride's segments</h6>
-        <p class="card-text">
-          For each ride returned from the API in the previous step save the following in a
-          transactional batch: the ride, the ride segment efforts and a segment performance
-          placeholder for each segment (c. 50-300 per ride).
-        </p>
+<h3 class="mt-4">Explanation of steps</h3>
+<h6 class=" mb-2 text-muted">
+  Expand the sections below to get an explanation of the steps involved in persisting new Strava
+  rides and refreshing segment performance data.
+</h6>
+
+<p-accordion>
+  <p-accordionTab header="Persist New Strava Rides">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="card-deck">
+          <div class="card  p-3 m-3">
+            <img
+              src="assets/images/strava-bike-landscape.png"
+              class="card-img-top mb-2"
+              alt="..."
+            />
+
+            <h5 class="card-title">Step 1 (Strava API)</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Get list of rides from Strava API</h6>
+            <p class="card-text">
+              Returns summary information for all activities. Used to get complete list of all
+              activity IDs. This returns information in pages (max 200 per page) and must be called
+              multiple times to get all activities.
+            </p>
+            <a
+              href="https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities"
+              target="_blank"
+              class="card-link"
+              >All Activities API</a
+            >
+          </div>
+
+          <div class="card  p-3 m-3">
+            <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
+
+            <h5 class="card-title">Step 2 (DB Read)</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Check if ride is in the Firestore DB</h6>
+            <p class="card-text">
+              For each activity returned, check if that activity is a ride (as opposed to a run or
+              gym workout) and then make a call to the Firestore database to see if this ride has
+              already been saved.
+            </p>
+          </div>
+
+          <div class="card  p-3 m-3">
+            <img
+              src="assets/images/strava-bike-landscape.png"
+              class="card-img-top mb-2"
+              alt="..."
+            />
+
+            <h5 class="card-title">Step 3 (Strava API)</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Get Ride details for unsaved rides</h6>
+            <p class="card-text">
+              For each ride that had not been previously saved in the Firestore DB, get ride details
+              (including all segments ridden) from the Strava API.
+            </p>
+            <a
+              href="https://developers.strava.com/docs/reference/#api-Activities-getActivityById"
+              target="_blank"
+              class="card-link"
+              >Activity API</a
+            >
+          </div>
+
+          <div class="card p-3 m-3">
+            <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
+
+            <h5 class="card-title">Step 4 (DB Batch Write)</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Save ride and ride segments</h6>
+            <p class="card-text">
+              For each ride returned from the API in the previous step save the following in a
+              transactional batch: the ride, the ride segment efforts and a segment performance
+              placeholder for each segment (c. 50-300 per ride).
+            </p>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
+  </p-accordionTab>
+  <p-accordionTab header="Refresh Performance Data">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="card-deck">
+          <div class="card p-3 m-3">
+            <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
+
+            <h5 class="card-title">Step 1 (DB Read)</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Get segments requiring refresh</h6>
+            <p class="card-text">
+              Get all segments that require refresh of their leaderboard and number of times ridden.
+            </p>
+          </div>
+
+          <div class="card m-3 p-3">
+            <img
+              src="assets/images/strava-bike-landscape.png"
+              class="card-img-top mb-2"
+              alt="..."
+            />
+
+            <h5 class="card-title">Step 2 (Strava API)</h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+              Get leaderboard and number of times ridden
+            </h6>
+            <p class="card-text">
+              For each segment returned from the previous DB query, call two Strava APIs - one to
+              get the leaderboard information for that segment and the other to get the number of
+              times the segment has been ridden.
+            </p>
+            <div>
+              <a
+                href="https://developers.strava.com/docs/reference/#api-Segments-getLeaderboardBySegmentId"
+                target="_blank"
+                class="card-link"
+                >Leaderboard API</a
+              >
+              <a
+                href="https://developers.strava.com/docs/reference/#api-Segments-getSegmentById"
+                target="_blank"
+                class="card-link"
+                >Segment API</a
+              >
+            </div>
+          </div>
+
+          <div class="card m-3 p-3">
+            <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
+
+            <h5 class="card-title">Step 2 (DB Write)</h5>
+            <h6 class="card-subtitle mb-2 text-muted">Save save segment performance data</h6>
+            <p class="card-text">
+              Using the data returned from the API, update the segment performance data in the DB
+              with the leaderboard information and number of times ridden.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </p-accordionTab>
+</p-accordion>

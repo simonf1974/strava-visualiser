@@ -11,6 +11,9 @@ import { DropdownModule } from "primeng/dropdown";
 import { ChartModule } from "primeng/chart";
 import { OrganizationChartModule } from "primeng/organizationchart";
 import { ProgressBarModule } from "primeng/progressbar";
+import { ButtonModule } from "primeng/button";
+import { ToolbarModule } from "primeng/toolbar";
+import { AccordionModule } from "primeng/accordion";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -54,7 +57,10 @@ import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
     FormsModule,
     ChartModule,
     OrganizationChartModule,
-    ProgressBarModule
+    ProgressBarModule,
+    ButtonModule,
+    ToolbarModule,
+    AccordionModule
   ],
   providers: [RidesService, StravaService],
   bootstrap: [AppComponent]
