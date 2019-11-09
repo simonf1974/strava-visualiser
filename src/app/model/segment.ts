@@ -6,13 +6,21 @@ export class SegmentPerformances {
   constructor(segmentPerformances: ISegPerformance[]) {
     this._segmentPerformances = [];
     segmentPerformances.forEach(segmentPerformance => {
-      // console.log(segmentPerformance);
       this._segmentPerformances.push(Object.assign(new SegmentPerformance(), segmentPerformance));
     });
   }
 
   get segmentPerformances(): SegmentPerformance[] {
     return this._segmentPerformances;
+  }
+
+  getSegmentEffortWithPerformance(segmentEfforts: SegmentEffort[]) {
+    return segmentEfforts.map(segEffort => {
+      segEffort.segmentPerformance = this.segmentPerformances.find(
+        segPerf => segEffort.segment_id === segPerf.segment_id
+      );
+      return segEffort;
+    });
   }
 }
 
@@ -45,4 +53,17 @@ export class SegmentPerformance {
   get segment_average_grade() {
     return this.segment.average_grade;
   }
+}
+
+export class SegmentEffort {
+  average_cadence: number;
+  average_watts: number;
+  device_watts: boolean;
+  elapsed_time: number;
+  id: number;
+  moving_time: number;
+  segment_id: number;
+  start_date: string;
+  segment: ISegment;
+  segmentPerformance: SegmentPerformance;
 }

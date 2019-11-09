@@ -33,6 +33,7 @@ import { RidesListComponent } from "./components/rides-list/rides-list.component
 import { RidesChartComponent } from "./components/rides-chart/rides-chart.component";
 import { SegPerfListComponent } from "./components/seg-perf-list/seg-perf-list.component";
 import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
+import { SegEffortsListComponent } from './components/seg-efforts-list/seg-efforts-list.component';
 
 const dbConfig: DBConfig = {
   name: "MyDb",
@@ -57,7 +58,8 @@ const dbConfig: DBConfig = {
     RidesListComponent,
     RidesChartComponent,
     SegPerfListComponent,
-    NavBarComponent
+    NavBarComponent,
+    SegEffortsListComponent
   ],
   imports: [
     BrowserModule,

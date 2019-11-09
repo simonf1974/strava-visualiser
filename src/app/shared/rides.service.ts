@@ -12,7 +12,7 @@ import {
   ISegPerfPreSave
 } from "../model/model";
 import { Rides } from "../model/ride";
-import { SegmentPerformances, SegmentPerformance } from "../model/segment";
+import { SegmentPerformances, SegmentEffort } from "../model/segment";
 import { NgxIndexedDBService } from "ngx-indexed-db";
 
 @Injectable({
@@ -170,6 +170,20 @@ export class RidesService {
     this.incrementCount("numDbWritesMade");
     this.dbService.clear().then(res => {
       this.incrementCount("numDbWritesDone");
+    });
+  }
+
+  getRideSegments(rideId: number): Promise<SegmentEffort[]> {
+    return this.dbService.getByIndex("key", rideId).then(segEfforts => {
+      if (segEfforts === undefined) return this.getRideSegmentsFromDb(rideId);
+      else return JSON.parse(segEfforts.value).seg_efforts;
+    });
+  }
+
+  private getRideSegmentsFromDb(rideId: number): Promise<ISegEffort[]> {
+    return this.getByKeyFromDb("ride_seg_efforts", rideId).then(segEfforts => {
+      this.dbService.add({ key: rideId, value: JSON.stringify(segEfforts) });
+      return segEfforts.seg_efforts;
     });
   }
 
