@@ -10,6 +10,7 @@ import { InputTextModule } from "primeng/inputtext";
 import { DropdownModule } from "primeng/dropdown";
 import { ChartModule } from "primeng/chart";
 import { OrganizationChartModule } from "primeng/organizationchart";
+import { ProgressBarModule } from "primeng/progressbar";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
@@ -52,7 +53,8 @@ import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
     DropdownModule,
     FormsModule,
     ChartModule,
-    OrganizationChartModule
+    OrganizationChartModule,
+    ProgressBarModule
   ],
   providers: [RidesService, StravaService],
   bootstrap: [AppComponent]
