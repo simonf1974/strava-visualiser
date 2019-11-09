@@ -1,3 +1,5 @@
+import * as FileSaver from "file-saver";
+
 export interface IRideDetails {
   ride: IRide;
   segEfforts: ISegEffort[];
@@ -115,7 +117,7 @@ export interface IChartPoint {
   r?: number;
 }
 
-const maxLocalStorageLength = 90000000;
+const maxLocalStorageLength = 900000;
 
 export const saveToLocalStorage = (objToSave, name: string) => {
   const objString = JSON.stringify(objToSave);
@@ -132,6 +134,11 @@ export const saveToLocalStorage = (objToSave, name: string) => {
 };
 
 export const getFromLocalStorage = (name: string) => {
+  const blob = new Blob(["Hello, world!"], { type: "text/plain;charset=utf-8" });
+  FileSaver.saveAs(blob, "simonhelloworld.txt");
+
+  console.log(blob);
+
   let moreToGet = true;
   let page = 0;
   let objStringPaged: string[] = [];

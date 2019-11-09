@@ -192,7 +192,7 @@ export class RidesService {
             .where("num_entries", ">", 1)
             .orderBy("num_entries", "desc")
             .orderBy("num_times_ridden", "desc")
-            .limit(5)
+            .limit(10)
         )
         .get()
         .toPromise()

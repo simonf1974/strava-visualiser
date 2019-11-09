@@ -24,6 +24,7 @@
     "angular-font-awesome": "^3.1.2",
     "bootstrap": "^4.3.1",
     "chart.js": "^2.8.0",
+    "file-saver": "^2.0.2",
     "firebase": "^7.2.2",
     "font-awesome": "^4.7.0",
     "jquery": "^3.4.1",
