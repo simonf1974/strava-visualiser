@@ -17,7 +17,7 @@ export class RidesChartComponent implements OnInit {
   constructor(private ridesService: RidesService) {}
 
   ngOnInit() {
-    this.getRides(false);
+    this.getRides();
     this.initChartOptions();
   }
 
@@ -76,8 +76,8 @@ export class RidesChartComponent implements OnInit {
     };
   }
 
-  getRides(getFromDb: boolean) {
-    this.ridesService.getRides(getFromDb).then((rides: Rides) => {
+  getRides() {
+    this.ridesService.getRides().then((rides: Rides) => {
       this.rides = rides;
 
       const distAggData = this.rides.getRidesByMonth();

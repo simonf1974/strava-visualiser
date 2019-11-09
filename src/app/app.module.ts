@@ -15,6 +15,8 @@ import { ButtonModule } from "primeng/button";
 import { ToolbarModule } from "primeng/toolbar";
 import { AccordionModule } from "primeng/accordion";
 
+import { NgxIndexedDBModule, DBConfig } from "ngx-indexed-db";
+
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 import { GraphComponent } from "./components/graph/graph.component";
@@ -31,6 +33,21 @@ import { RidesListComponent } from "./components/rides-list/rides-list.component
 import { RidesChartComponent } from "./components/rides-chart/rides-chart.component";
 import { SegPerfListComponent } from "./components/seg-perf-list/seg-perf-list.component";
 import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
+
+const dbConfig: DBConfig = {
+  name: "MyDb",
+  version: 1,
+  objectStoresMeta: [
+    {
+      store: "ridecache",
+      storeConfig: { keyPath: "id", autoIncrement: true },
+      storeSchema: [
+        { name: "key", keypath: "key", options: { unique: true } },
+        { name: "value", keypath: "value", options: { unique: false } }
+      ]
+    }
+  ]
+};
 
 @NgModule({
   declarations: [
@@ -60,7 +77,8 @@ import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
     ProgressBarModule,
     ButtonModule,
     ToolbarModule,
-    AccordionModule
+    AccordionModule,
+    NgxIndexedDBModule.forRoot(dbConfig)
   ],
   providers: [RidesService, StravaService],
   bootstrap: [AppComponent]

@@ -4,7 +4,13 @@
   <div class="d-flex justify-content-center m-2">
     <p-button class="mr-3" (click)="scrapeStravaData()" label="Persist new Strava Rides"></p-button>
 
-    <p-button (click)="refreshPerformanceData()" label="Refresh Performance Data"></p-button>
+    <p-button
+      class="mr-3"
+      (click)="refreshPerformanceData()"
+      label="Refresh Performance Data"
+    ></p-button>
+
+    <p-button (click)="clearLocalDb()" label="Clear Local DB"></p-button>
   </div>
 
   <div class="container-fluid d-flex justify-content-center ">

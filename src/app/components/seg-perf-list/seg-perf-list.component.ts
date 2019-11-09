@@ -1,8 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { RidesService } from "src/app/shared/rides.service";
 import { FilterUtils } from "primeng/api";
-import { SegmentPerformances, SegmentPerformance } from "src/app/model/segment";
-import { saveToLocalStorage, getFromLocalStorage } from "src/app/model/model";
+import { SegmentPerformances } from "src/app/model/segment";
 
 @Component({
   selector: "app-seg-perf-list",
@@ -15,7 +14,7 @@ export class SegPerfListComponent implements OnInit {
   selectedColumns: any[];
 
   constructor(private ridesService: RidesService) {
-    this.ridesService.getSegPerformances(false).then((segPerfs: SegmentPerformances) => {
+    this.ridesService.getSegPerformances().then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
       this.cols = [
         { field: "segment_name_with_link", header: "Name" },

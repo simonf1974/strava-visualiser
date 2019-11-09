@@ -25,6 +25,10 @@ export class FirestoreCrudComponent implements OnInit {
     this.ridesService.refreshPerformanceData();
   }
 
+  clearLocalDb() {
+    this.ridesService.clearLocalDb();
+  }
+
   ngOnInit() {
     this.ridesService.calls.subscribe(calls => {
       this.calls = calls;

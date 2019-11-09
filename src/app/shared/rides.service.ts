@@ -9,12 +9,11 @@ import {
   IRideDetails,
   ISegEffort,
   ISegPerfPreUpdate,
-  ISegPerfPreSave,
-  getFromLocalStorage,
-  saveToLocalStorage
+  ISegPerfPreSave
 } from "../model/model";
 import { Rides } from "../model/ride";
 import { SegmentPerformances, SegmentPerformance } from "../model/segment";
+import { NgxIndexedDBService } from "ngx-indexed-db";
 
 @Injectable({
   providedIn: "root"
@@ -37,7 +36,11 @@ export class RidesService {
     [firestore.WriteBatch, number]
   >();
 
-  constructor(private firestore: AngularFirestore, private stravaService: StravaService) {
+  constructor(
+    private firestore: AngularFirestore,
+    private stravaService: StravaService,
+    private dbService: NgxIndexedDBService
+  ) {
     this.calls = new BehaviorSubject(this._calls);
     this.stravaService.incrementCount.subscribe(call => {
       if (call !== null) this.incrementCount(call);
@@ -45,6 +48,8 @@ export class RidesService {
     this.stravaService.propagateMsg.subscribe(msg => {
       if (msg !== null) this.propagateMsg(msg.key, msg.error);
     });
+
+    dbService.currentStore = "ridecache";
   }
 
   private incrementCount(call: string): void {
@@ -161,48 +166,58 @@ export class RidesService {
 
   // Database access
 
-  getRides(getFromDb: boolean): Promise<Rides> {
-    const localStorageRides = getFromDb ? null : getFromLocalStorage("rides");
-    if (localStorageRides !== null)
-      return new Promise(resolve => {
-        resolve(new Rides(localStorageRides._rides));
-      });
-    else
-      return this.firestore
-        .collection("rides", ref => ref.limit(1000))
-        .get()
-        .toPromise()
-        .then(res => {
-          const rides = new Rides(res.docs.map(ride => ride.data() as IRide));
-          saveToLocalStorage(rides, "rides");
-          return rides;
-        });
+  clearLocalDb() {
+    this.incrementCount("numDbWritesMade");
+    this.dbService.clear().then(res => {
+      this.incrementCount("numDbWritesDone");
+    });
   }
 
-  getSegPerformances(getFromDb: boolean): Promise<SegmentPerformances> {
-    const localStorageSegPerfs = getFromDb ? null : getFromLocalStorage("segPerfs");
-    if (localStorageSegPerfs !== null)
-      return new Promise(resolve => {
-        resolve(new SegmentPerformances(localStorageSegPerfs._segmentPerformances));
+  getRides(): Promise<Rides> {
+    return this.dbService.getByIndex("key", "rides").then(rides => {
+      if (rides === undefined) return this.getRidesFromDb();
+      else return new Rides(JSON.parse(rides.value)._rides);
+    });
+  }
+
+  private getRidesFromDb(): Promise<Rides> {
+    return this.firestore
+      .collection("rides", ref => ref.limit(5000))
+      .get()
+      .toPromise()
+      .then(res => {
+        console.log("got rides from db");
+        const rides = new Rides(res.docs.map(ride => ride.data() as IRide));
+        this.dbService.add({ key: "rides", value: JSON.stringify(rides) });
+        return rides;
       });
-    else
-      return this.firestore
-        .collection("segment_performance", (ref: CollectionReference) =>
-          ref
-            .where("num_entries", ">", 1)
-            .orderBy("num_entries", "desc")
-            .orderBy("num_times_ridden", "desc")
-            .limit(10)
-        )
-        .get()
-        .toPromise()
-        .then(res => {
-          const segPerfs = new SegmentPerformances(
-            res.docs.map(segPerf => segPerf.data() as ISegPerformance)
-          );
-          saveToLocalStorage(segPerfs, "segPerfs");
-          return segPerfs;
-        });
+  }
+
+  getSegPerformances(): Promise<SegmentPerformances> {
+    return this.dbService.getByIndex("key", "segPerfs").then(segPerfs => {
+      if (segPerfs === undefined) return this.getSegPerformancesFromDb();
+      else return new SegmentPerformances(JSON.parse(segPerfs.value)._segmentPerformances);
+    });
+  }
+
+  private getSegPerformancesFromDb(): Promise<SegmentPerformances> {
+    return this.firestore
+      .collection("segment_performance", (ref: CollectionReference) =>
+        ref
+          .where("num_entries", ">", 1)
+          .orderBy("num_entries", "desc")
+          .orderBy("num_times_ridden", "desc")
+          .limit(15000)
+      )
+      .get()
+      .toPromise()
+      .then(res => {
+        const segPerfs = new SegmentPerformances(
+          res.docs.map(segPerf => segPerf.data() as ISegPerformance)
+        );
+        this.dbService.add({ key: "segPerfs", value: JSON.stringify(segPerfs) });
+        return segPerfs;
+      });
   }
 
   private getByKeyFromDb(collection: string, key: number | number[]): Promise<any> {
