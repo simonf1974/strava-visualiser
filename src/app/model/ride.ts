@@ -123,8 +123,4 @@ export class Ride {
   year: number;
 
   constructor() {}
-
-  getYearTimesTwo() {
-    return this.year * 2;
-  }
 }

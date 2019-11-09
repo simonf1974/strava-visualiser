@@ -21,7 +21,7 @@ export class RidesListComponent implements OnInit {
   constructor(private ridesService: RidesService) {}
 
   ngOnInit() {
-    this.ridesService.getRides().then((rides: Rides) => {
+    this.ridesService.getRides(false).then((rides: Rides) => {
       this.rides = rides;
       this.cols = [
         { field: "year", header: "Year" },

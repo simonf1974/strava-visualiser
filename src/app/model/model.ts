@@ -82,35 +82,6 @@ export interface ISegPerfPreUpdate {
   entries: ILeaderboardEntry[];
 }
 
-export interface ISegPerformanceFlat {
-  num_times_ridden: number;
-  requires_refresh: boolean;
-  athlete_id: number;
-  segment_id: number;
-  people_above: string;
-  people_below: string;
-  rank: number;
-  num_entries: number;
-  pr_date: string;
-  pr_elapsed_time: number;
-  pr_moving_time: number;
-  top_date: string;
-  top_elapsed_time: number;
-  top_moving_time: number;
-  entries: ILeaderboardEntry[];
-  segment_average_grade: number;
-  segment_city: string;
-  segment_climb_category: number;
-  segment_country: string;
-  segment_distance: number;
-  segment_elevation_high: number;
-  segment_elevation_low: number;
-  segment_maximum_grade: number;
-  segment_name: string;
-  segment_state: string;
-  segment_name_with_link: string;
-}
-
 export interface ISegPerformance {
   num_times_ridden: number;
   requires_refresh: boolean;
@@ -143,3 +114,35 @@ export interface IChartPoint {
   y: number;
   r?: number;
 }
+
+const maxLocalStorageLength = 90000000;
+
+export const saveToLocalStorage = (objToSave, name: string) => {
+  const objString = JSON.stringify(objToSave);
+  const pages = Math.floor(objString.length / maxLocalStorageLength) + 1;
+  const objStringPaged: string[] = [];
+
+  for (let i = 0; i < pages; i++) {
+    let startPos = 0;
+    if (i > 0) startPos = maxLocalStorageLength * i;
+    objStringPaged.push(objString.slice(startPos, (i + 1) * maxLocalStorageLength));
+  }
+
+  objStringPaged.forEach((str: string, ind: number) => localStorage.setItem(`${name}${ind}`, str));
+};
+
+export const getFromLocalStorage = (name: string) => {
+  let moreToGet = true;
+  let page = 0;
+  let objStringPaged: string[] = [];
+
+  while (moreToGet) {
+    const str = localStorage.getItem(`${name}${page}`);
+    if (str !== null) {
+      objStringPaged.push(str);
+      moreToGet = str.length === maxLocalStorageLength;
+    } else moreToGet = false;
+  }
+  if (objStringPaged.length === 0) return null;
+  else return JSON.parse(objStringPaged.join(""));
+};

@@ -16,25 +16,68 @@ export class RidesChartComponent implements OnInit {
 
   constructor(private ridesService: RidesService) {}
 
-  getHue(nowTemp) {
-    // following hsl wheel counterclockwise from 0
-    // to go clockwise, make maxHsl and minHsl negative
-    // nowTemp = 70;
-    var maxHsl = 380; // maxHsl maps to max temp (here: 20deg past 360)
-    var minHsl = 170; //  minhsl maps to min temp counter clockwise
-    var rngHsl = maxHsl - minHsl; // = 210
-
-    var maxTemp = 115;
-    var minTemp = -10;
-    var rngTemp = maxTemp - minTemp; // 125
-    var degCnt = maxTemp - nowTemp; // 0
-    var hslsDeg = rngHsl / rngTemp; //210 / 125 = 1.68 Hsl-degs to Temp-degs
-    var returnHue = 360 - (degCnt * hslsDeg - (maxHsl - 360));
-    return returnHue;
+  ngOnInit() {
+    this.getRides(false);
+    this.initChartOptions();
   }
 
-  ngOnInit() {
-    this.ridesService.getRides().then((rides: Rides) => {
+  initChartOptions() {
+    this.options = {
+      title: {
+        display: true,
+        text: "Cycing Activity by Year",
+        fontSize: 16
+      },
+      legend: {
+        position: "bottom"
+      },
+      scales: {
+        yAxes: [
+          {
+            ticks: {
+              beginAtZero: true,
+              callback: function(label, index, labels) {
+                return label.toLocaleString() + " km";
+              }
+            },
+            stacked: true,
+            position: "right",
+            id: "km",
+            scaleLabel: {
+              display: true,
+              labelString: "Total Distance (km)"
+            }
+          },
+          {
+            ticks: {
+              callback: function(label, index, labels) {
+                return label + " kph";
+              }
+            },
+            position: "left",
+            id: "kph",
+            scaleLabel: {
+              display: true,
+              labelString: "Average Speed (kph)"
+            }
+          }
+        ],
+        xAxes: [
+          {
+            type: "time",
+            time: {
+              unit: "year"
+            },
+            stacked: true,
+            offset: true
+          }
+        ]
+      }
+    };
+  }
+
+  getRides(getFromDb: boolean) {
+    this.ridesService.getRides(getFromDb).then((rides: Rides) => {
       this.rides = rides;
 
       const distAggData = this.rides.getRidesByMonth();
@@ -135,62 +178,6 @@ export class RidesChartComponent implements OnInit {
             yAxisID: "km"
           }
         ]
-      };
-
-      this.options = {
-        title: {
-          display: true,
-          text: "Cycing Activity by Year",
-          fontSize: 16
-        },
-        legend: {
-          position: "bottom"
-        },
-        scales: {
-          yAxes: [
-            {
-              ticks: {
-                beginAtZero: true,
-                callback: function(label, index, labels) {
-                  return label.toLocaleString() + " km";
-                }
-              },
-              stacked: true,
-              position: "right",
-              id: "km",
-              scaleLabel: {
-                display: true,
-                labelString: "Total Distance (km)"
-              }
-            },
-            {
-              ticks: {
-                // beginAtZero: true
-                callback: function(label, index, labels) {
-                  return label + " kph";
-                }
-              },
-              position: "left",
-              id: "kph",
-              scaleLabel: {
-                display: true,
-                labelString: "Average Speed (kph)"
-              }
-
-              // stacked: true
-            }
-          ],
-          xAxes: [
-            {
-              type: "time",
-              time: {
-                unit: "year"
-              },
-              stacked: true,
-              offset: true
-            }
-          ]
-        }
       };
     });
   }

@@ -10,10 +10,11 @@ import {
   ISegEffort,
   ISegPerfPreUpdate,
   ISegPerfPreSave,
-  ISegPerformanceFlat
+  getFromLocalStorage,
+  saveToLocalStorage
 } from "../model/model";
-import { mockRides } from "src/assets/model/mock-data";
 import { Rides } from "../model/ride";
+import { SegmentPerformances, SegmentPerformance } from "../model/segment";
 
 @Injectable({
   providedIn: "root"
@@ -44,10 +45,6 @@ export class RidesService {
     this.stravaService.propagateMsg.subscribe(msg => {
       if (msg !== null) this.propagateMsg(msg.key, msg.error);
     });
-
-    localStorage.setItem("hh", "hf");
-
-    console.log(localStorage.getItem("hh"));
   }
 
   private incrementCount(call: string): void {
@@ -164,37 +161,48 @@ export class RidesService {
 
   // Database access
 
-  getRides(): Promise<Rides> {
-    return new Promise(resolve => {
-      resolve(new Rides(mockRides));
-    });
-
-    // return this.firestore
-    //   .collection("rides", ref => ref.limit(1000))
-    //   .get()
-    //   .toPromise()
-    //   .then(res => {
-    //     return res.docs.map(ride => ride.data() as IRide);
-    //   });
+  getRides(getFromDb: boolean): Promise<Rides> {
+    const localStorageRides = getFromDb ? null : getFromLocalStorage("rides");
+    if (localStorageRides !== null)
+      return new Promise(resolve => {
+        resolve(new Rides(localStorageRides._rides));
+      });
+    else
+      return this.firestore
+        .collection("rides", ref => ref.limit(1000))
+        .get()
+        .toPromise()
+        .then(res => {
+          const rides = new Rides(res.docs.map(ride => ride.data() as IRide));
+          saveToLocalStorage(rides, "rides");
+          return rides;
+        });
   }
 
-  getSegPerformances() {
-    return this.firestore
-      .collection("segment_performance", (ref: CollectionReference) =>
-        ref
-          // .where("num_entries", ">", 1)
-          .where("num_times_ridden", ">", 2)
-          .orderBy("num_times_ridden", "desc")
-          .orderBy("num_entries", "desc")
-          .limit(5)
-      )
-      .get()
-      .toPromise()
-      .then(res => {
-        return res.docs.map(segPerfs => {
-          return this.flattenSegPerf(segPerfs.data() as ISegPerformance);
-        });
+  getSegPerformances(getFromDb: boolean): Promise<SegmentPerformances> {
+    const localStorageSegPerfs = getFromDb ? null : getFromLocalStorage("segPerfs");
+    if (localStorageSegPerfs !== null)
+      return new Promise(resolve => {
+        resolve(new SegmentPerformances(localStorageSegPerfs._segmentPerformances));
       });
+    else
+      return this.firestore
+        .collection("segment_performance", (ref: CollectionReference) =>
+          ref
+            .where("num_entries", ">", 1)
+            .orderBy("num_entries", "desc")
+            .orderBy("num_times_ridden", "desc")
+            .limit(5)
+        )
+        .get()
+        .toPromise()
+        .then(res => {
+          const segPerfs = new SegmentPerformances(
+            res.docs.map(segPerf => segPerf.data() as ISegPerformance)
+          );
+          saveToLocalStorage(segPerfs, "segPerfs");
+          return segPerfs;
+        });
   }
 
   private getByKeyFromDb(collection: string, key: number | number[]): Promise<any> {
@@ -315,36 +323,5 @@ export class RidesService {
       }
     };
     return JSON.parse(JSON.stringify(segPerf));
-  }
-
-  private flattenSegPerf(segPerf: ISegPerformance): ISegPerformanceFlat {
-    return {
-      num_times_ridden: segPerf.num_times_ridden,
-      requires_refresh: segPerf.requires_refresh,
-      athlete_id: segPerf.athlete_id,
-      segment_id: segPerf.segment_id,
-      people_above: segPerf.people_above,
-      people_below: segPerf.people_below,
-      rank: segPerf.rank,
-      num_entries: segPerf.num_entries,
-      pr_date: segPerf.pr_date,
-      pr_elapsed_time: segPerf.pr_elapsed_time,
-      pr_moving_time: segPerf.pr_moving_time,
-      top_date: segPerf.top_date,
-      top_elapsed_time: segPerf.top_elapsed_time,
-      top_moving_time: segPerf.top_moving_time,
-      entries: segPerf.entries,
-      segment_average_grade: segPerf.segment.average_grade,
-      segment_city: segPerf.segment.city,
-      segment_climb_category: segPerf.segment.climb_category,
-      segment_country: segPerf.segment.country,
-      segment_distance: segPerf.segment.distance,
-      segment_elevation_high: segPerf.segment.elevation_high,
-      segment_elevation_low: segPerf.segment.elevation_low,
-      segment_maximum_grade: segPerf.segment.maximum_grade,
-      segment_name: segPerf.segment.name,
-      segment_state: segPerf.segment.state,
-      segment_name_with_link: `<span><a href='https://www.strava.com/segments/${segPerf.segment.id}' target='_blank'>${segPerf.segment.name}</a></span>`
-    };
   }
 }

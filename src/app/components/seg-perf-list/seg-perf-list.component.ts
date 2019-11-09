@@ -1,13 +1,8 @@
 import { Component, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { RidesService } from "src/app/shared/rides.service";
-import { ISegPerformance, ISegPerformanceFlat } from "../../model/model";
-import { TableModule } from "primeng/table";
-import { MultiSelectModule } from "primeng/multiselect";
-import { InputTextModule } from "primeng/inputtext";
-import { DropdownModule } from "primeng/dropdown";
 import { FilterUtils } from "primeng/api";
-import * as _ from "lodash";
+import { SegmentPerformances, SegmentPerformance } from "src/app/model/segment";
+import { saveToLocalStorage, getFromLocalStorage } from "src/app/model/model";
 
 @Component({
   selector: "app-seg-perf-list",
@@ -15,35 +10,12 @@ import * as _ from "lodash";
   styleUrls: ["./seg-perf-list.component.scss"]
 })
 export class SegPerfListComponent implements OnInit {
-  segPerfs: ISegPerformanceFlat[];
+  segPerfs: SegmentPerformances;
   cols: any[];
   selectedColumns: any[];
 
-  constructor(private ridesService: RidesService) {}
-
-  ngOnInit() {
-    this.ridesService.getSegPerformances().then((segPerfs: ISegPerformanceFlat[]) => {
-      // console.log(JSON.stringify(segPerfs));
-
-      // console.log(JSON.stringify(segPerfs).length);
-
-      // const segPerfsStr = JSON.stringify(segPerfs);
-      // console.log(segPerfsStr.length);
-
-      // const page1 = Math.floor(segPerfsStr.length / 3);
-      // const page2 = Math.floor(page1 * 2);
-
-      // localStorage.setItem("segPerf1", segPerfsStr.slice(0, page1));
-      // localStorage.setItem("segPerf2", segPerfsStr.slice(page1, page2));
-      // localStorage.setItem("segPerf3", segPerfsStr.slice(page2, segPerfsStr.length));
-
-      // const segPerfsStr2 = `${localStorage.getItem("segPerf1")}${localStorage.getItem(
-      //   "segPerf2"
-      // )}${localStorage.getItem("segPerf3")}`;
-      // console.log(segPerfsStr2.length);
-      // console.log(segPerfsStr2);
-      // this.segPerfs = JSON.parse(segPerfsStr2);
-
+  constructor(private ridesService: RidesService) {
+    this.ridesService.getSegPerformances(false).then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
       this.cols = [
         { field: "segment_name_with_link", header: "Name" },
@@ -66,4 +38,6 @@ export class SegPerfListComponent implements OnInit {
       };
     });
   }
+
+  ngOnInit() {}
 }
