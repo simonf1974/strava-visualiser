@@ -1,11 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { FormsModule } from "@angular/forms";
 import { RidesService } from "src/app/shared/rides.service";
-import { Ride, Rides } from "../../model/ride";
-import { TableModule } from "primeng/table";
-import { MultiSelectModule } from "primeng/multiselect";
-import { InputTextModule } from "primeng/inputtext";
-import { DropdownModule } from "primeng/dropdown";
+import { Rides } from "../../model/ride";
 import { FilterUtils } from "primeng/api";
 
 @Component({
@@ -24,13 +19,18 @@ export class RidesListComponent implements OnInit {
     this.ridesService.getRides().then((rides: Rides) => {
       this.rides = rides;
       this.cols = [
-        { field: "year", header: "Year" },
-        { field: "month", header: "Month" },
-        { field: "start_date", header: "Date" },
-        { field: "name", header: "Name" },
-        { field: "distance", header: "Distance (km)" },
-        { field: "moving_time", header: "Time (hrs)" },
-        { field: "average_speed", header: "Avg Speed (kph)" }
+        { field: "nameWithLink", header: "Name" },
+        { field: "date", header: "Date" },
+        { field: "distance", header: "Dist (km)" },
+        { field: "movingTimeFormatted", header: "Moving Time (hrs)" },
+        { field: "average_speed", header: "Avg Speed (kph)" },
+        { field: "total_elevation_gain", header: "Elevation gain (m)" },
+        { field: "weighted_average_watts", header: "Avg Watts" },
+        { field: "average_temp", header: "Avg Temp (c)" },
+        { field: "cals", header: "Cals" },
+        { field: "pr_count", header: "PR Count" },
+        { field: "kudos_count", header: "Kudos" },
+        { field: "achievement_count", header: "Achieve" }
       ];
       this.selectedColumns = this.cols;
       FilterUtils["greaterThan"] = (value, filter): boolean => {
@@ -39,5 +39,10 @@ export class RidesListComponent implements OnInit {
         return parseInt(filter) < value;
       };
     });
+  }
+
+  getColFilterType(col: string) {
+    if (col === "nameWithLink" || col === "date") return "equals";
+    else return "greaterThan";
   }
 }

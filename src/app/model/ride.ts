@@ -6,6 +6,10 @@ export class Rides {
   constructor(rides: IRide[]) {
     this._rides = [];
     rides.forEach(ride => this._rides.push(Object.assign(new Ride(), ride)));
+
+    this.rides.sort((a, b) =>
+      b.start_date > a.start_date ? 1 : a.start_date > b.start_date ? -1 : 0
+    );
   }
 
   get rides(): Ride[] {
@@ -123,4 +127,27 @@ export class Ride {
   year: number;
 
   constructor() {}
+
+  get date() {
+    return this.start_date.slice(0, 10);
+  }
+
+  get cals() {
+    return Math.floor(this.calories);
+  }
+
+  get movingTimeFormatted() {
+    const dateObj = new Date(this.moving_time * 3600 * 1000);
+    const hours = dateObj.getUTCHours();
+    const minutes = dateObj.getUTCMinutes();
+
+    const timeString =
+      hours.toString().padStart(2, "0") + ":" + minutes.toString().padStart(2, "0");
+
+    return timeString;
+  }
+
+  get nameWithLink() {
+    return `<span><a href='https://www.strava.com/activities/${this.id}' target='_blank'>${this.name}</a></span>`;
+  }
 }
