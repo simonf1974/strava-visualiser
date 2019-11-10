@@ -23,7 +23,7 @@ export class SegPerfChartComponent implements OnInit {
     this.options = {
       title: {
         display: true,
-        text: "Segment Performance",
+        text: "Segment Analysis",
         fontSize: 16
       },
 

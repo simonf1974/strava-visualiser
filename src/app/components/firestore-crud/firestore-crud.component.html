@@ -138,7 +138,7 @@
       </div>
     </div>
   </p-accordionTab>
-  <p-accordionTab header="Refresh Performance Data">
+  <p-accordionTab header="Refresh Segment Performance Data">
     <div class="container-fluid">
       <div class="row">
         <div class="card-deck">
@@ -192,6 +192,54 @@
             <p class="card-text">
               Using the data returned from the API, update the segment performance data in the DB
               with the leaderboard information and number of times ridden.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </p-accordionTab>
+
+  <p-accordionTab header="Local Database (IndexedDB)">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="card-deck">
+          <div class="card p-3 m-3">
+            <img src="assets/images/indexeddb.jpg" class="card-img-top mb-2" alt="..." />
+
+            <h5 class="card-title">Data Reads from Local DB</h5>
+            <h6 class="card-subtitle mb-2 text-muted">All data reads check local DB</h6>
+            <p class="card-text">
+              Whenever the application is first loaded and rides and/or segments are requested, the
+              local database
+              <a href="https://www.npmjs.com/package/ngx-indexed-db" target="_blank">(IndexedDB)</a>
+              is checked to see if it has the data. If it does, the data is served from there,
+              preventing the need to go to Firestore (which is much slower).
+            </p>
+          </div>
+
+          <div class="card p-3 m-3">
+            <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
+
+            <h5 class="card-title">Data Reads From Firestore</h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+              Data reads fall back to Firestore
+            </h6>
+            <p class="card-text">
+              If data is not available from the local DB, it is read from Firestore. The data
+              retrieved is then saved to the local DB for usage on the next request.
+            </p>
+          </div>
+
+          <div class="card p-3 m-3">
+            <img src="assets/images/indexeddb.jpg" class="card-img-top mb-2" alt="..." />
+
+            <h5 class="card-title">Clearing the local DB</h5>
+            <h6 class="card-subtitle mb-2 text-muted">
+              Ability to clear down the local DB
+            </h6>
+            <p class="card-text">
+              There is a button on this page to allow the user to clear the data stored in the local
+              DB. This would generally only be used after new data is pulled from Strava.
             </p>
           </div>
         </div>
