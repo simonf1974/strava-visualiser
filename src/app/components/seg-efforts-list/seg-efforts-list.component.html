@@ -47,6 +47,14 @@
         [pSortableColumn]="col.field"
         pResizableColumn
         pReorderableColumn
+        [ngClass]="{
+          'wide-column1': col.field === 'segment_name_with_link' || col.field === 'people_below',
+          'wide-column2':
+            col.field === 'pr_date' ||
+            col.field === 'people_above' ||
+            col.field === 'top_date' ||
+            col.field === 'segment_city'
+        }"
       >
         {{ col.header }}
         <p-sortIcon [field]="col.field"></p-sortIcon>

@@ -1,0 +1,23 @@
+.caption-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+input {
+  width: 100%;
+}
+
+.tdLessPadding {
+  td {
+    padding: 0.3em 0.4em !important;
+  }
+}
+
+.wide-column1 {
+  width: 200px;
+}
+
+.wide-column2 {
+  width: 90px;
+}

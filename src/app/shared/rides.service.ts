@@ -223,7 +223,8 @@ export class RidesService {
       if (segPerfs === undefined) return this.getSegPerformancesFromDb();
       else {
         const segPerfsToReturn: SegmentPerformances = new SegmentPerformances(
-          JSON.parse(segPerfs.value)._segmentPerformances
+          JSON.parse(segPerfs.value)._segmentPerformances,
+          null
         );
         this.segPerfs = segPerfsToReturn;
         return segPerfsToReturn;
@@ -238,12 +239,38 @@ export class RidesService {
           .where("num_entries", ">", 1)
           .orderBy("num_entries", "desc")
           .orderBy("num_times_ridden", "desc")
-          .limit(15000)
+          .limit(10000)
+      )
+      .get()
+      .toPromise()
+      .then(res => {
+        const segPerfsNumEntries = res.docs.map(segPerf => segPerf.data() as ISegPerformance);
+        return this.getSegPerformancesRiddenMostFromDb(segPerfsNumEntries);
+
+        // const segPerfs = new SegmentPerformances(
+        //   res.docs.map(segPerf => segPerf.data() as ISegPerformance)
+        // );
+        // this.dbService.add({ key: "segPerfs", value: JSON.stringify(segPerfs) });
+        // this.segPerfs = segPerfs;
+        // return segPerfs;
+      });
+  }
+
+  private getSegPerformancesRiddenMostFromDb(
+    segPerfsNumEntries: ISegPerformance[]
+  ): Promise<SegmentPerformances> {
+    return this.firestore
+      .collection("segment_performance", (ref: CollectionReference) =>
+        ref
+          .where("num_times_ridden", ">", 1)
+          .orderBy("num_times_ridden", "desc")
+          .limit(10000)
       )
       .get()
       .toPromise()
       .then(res => {
         const segPerfs = new SegmentPerformances(
+          segPerfsNumEntries,
           res.docs.map(segPerf => segPerf.data() as ISegPerformance)
         );
         this.dbService.add({ key: "segPerfs", value: JSON.stringify(segPerfs) });

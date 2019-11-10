@@ -29,19 +29,21 @@ export class SegEffortsListComponent implements OnInit {
         this.cols = [
           { field: "segment_name_with_link", header: "Name" },
           { field: "segment_city", header: "City" },
+          { field: "startTime", header: "Start Date" },
+          { field: "segment_distance", header: "Distance (km)" },
+          { field: "segment_average_grade", header: "Avg Grade (%)" },
+          { field: "avgWatts", header: "Avg Watts" },
+          { field: "elapsedTime", header: "Time" },
+          { field: "secondsBehindPr", header: "Behind PR" },
           { field: "num_times_ridden", header: "Times Ridden" },
           { field: "rank", header: "Rank" },
-          { field: "segment_average_grade", header: "Avg Grade" },
           { field: "people_above", header: "People Above" },
           { field: "people_below", header: "People Below" },
-          { field: "pr_date", header: "PR Date" },
-          { field: "pr_elapsed_time", header: "PR Time (s)" },
-          { field: "top_date", header: "Top Date" },
-          { field: "top_elapsed_time", header: "Top Time (s)" },
-          { field: "average_cadence", header: "Avg Cadence" },
-          { field: "average_watts", header: "Avg Watts" },
-          { field: "moving_time", header: "Moving Time" },
-          { field: "startTime", header: "Start Date" }
+          { field: "pr_elapsed_time", header: "PR Time" },
+          { field: "top_elapsed_time", header: "Top Time" },
+          { field: "secondsPrBehindTop", header: "PR Behind Top" }
+          // { field: "pr_date", header: "PR Date" },
+          // { field: "top_date", header: "Top Date" }
         ];
         this.selectedColumns = this.cols;
         FilterUtils["greaterThan"] = (value, filter): boolean => {
