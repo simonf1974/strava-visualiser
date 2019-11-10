@@ -1,1 +1,63 @@
-<p>seg-efforts-list works!</p>
+<p-table
+  #dt
+  [columns]="selectedColumns"
+  [value]="segEfforts"
+  sortMode="multiple"
+  [paginator]="true"
+  [rows]="20"
+  [resizableColumns]="true"
+  [reorderableColumns]="true"
+  class="tdLessPadding"
+>
+  <ng-template pTemplate="caption">
+    <div class="caption-container">
+      <div style="text-align:left">
+        <p-multiSelect
+          [options]="cols"
+          [(ngModel)]="selectedColumns"
+          optionLabel="header"
+          selectedItemsLabel="{0} columns selected"
+          [style]="{ minWidth: '200px' }"
+          defaultLabel="Choose Columns"
+        >
+        </p-multiSelect>
+      </div>
+
+      <div style="text-align: right">
+        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
+        <input
+          type="text"
+          pInputText
+          size="50"
+          placeholder="Global Filter"
+          (input)="dt.filterGlobal($event.target.value, 'contains')"
+          style="width:auto"
+        />
+      </div>
+    </div>
+  </ng-template>
+
+  <!-- <ng-template pTemplate="summary"> There are {{ segEfforts.length }} segments </ng-template> -->
+
+  <ng-template pTemplate="header" let-columns class="table-header-container">
+    <tr>
+      <th
+        class="table-header"
+        *ngFor="let col of columns"
+        [pSortableColumn]="col.field"
+        pResizableColumn
+        pReorderableColumn
+      >
+        {{ col.header }}
+        <p-sortIcon [field]="col.field"></p-sortIcon>
+      </th>
+    </tr>
+  </ng-template>
+  <ng-template pTemplate="body" let-segEffort let-columns="columns">
+    <tr>
+      <td *ngFor="let col of columns" class="ui-resizable-column">
+        <span innerHTML="{{ segEffort[col.field] }}"></span>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>

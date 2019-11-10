@@ -28,7 +28,7 @@ export class RidesListComponent implements OnInit {
         { field: "weighted_average_watts", header: "Avg Watts" },
         { field: "average_temp", header: "Avg Temp (c)" },
         { field: "cals", header: "Cals" },
-        { field: "pr_count", header: "PR Count" },
+        { field: "prCountWithLink", header: "PR Count" },
         { field: "kudos_count", header: "Kudos" },
         { field: "achievement_count", header: "Achieve" }
       ];

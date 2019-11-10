@@ -30,6 +30,8 @@ export class RidesService {
     databaseMsg: ""
   };
   calls: BehaviorSubject<any>;
+  private rides: Rides = null;
+  private segPerfs: SegmentPerformances = null;
 
   private batches: Map<number, [firestore.WriteBatch, number]> = new Map<
     number,
@@ -169,11 +171,13 @@ export class RidesService {
   clearLocalDb() {
     this.incrementCount("numDbWritesMade");
     this.dbService.clear().then(res => {
+      this.rides = null;
+      this.segPerfs = null;
       this.incrementCount("numDbWritesDone");
     });
   }
 
-  getRideSegments(rideId: number): Promise<SegmentEffort[]> {
+  getRideSegments(rideId: number): Promise<ISegEffort[]> {
     return this.dbService.getByIndex("key", rideId).then(segEfforts => {
       if (segEfforts === undefined) return this.getRideSegmentsFromDb(rideId);
       else return JSON.parse(segEfforts.value).seg_efforts;
@@ -188,9 +192,14 @@ export class RidesService {
   }
 
   getRides(): Promise<Rides> {
+    if (this.rides !== null) return new Promise(resolve => resolve(this.rides));
     return this.dbService.getByIndex("key", "rides").then(rides => {
       if (rides === undefined) return this.getRidesFromDb();
-      else return new Rides(JSON.parse(rides.value)._rides);
+      else {
+        const ridesToReturn: Rides = new Rides(JSON.parse(rides.value)._rides);
+        this.rides = ridesToReturn;
+        return ridesToReturn;
+      }
     });
   }
 
@@ -203,14 +212,22 @@ export class RidesService {
         console.log("got rides from db");
         const rides = new Rides(res.docs.map(ride => ride.data() as IRide));
         this.dbService.add({ key: "rides", value: JSON.stringify(rides) });
+        this.rides = rides;
         return rides;
       });
   }
 
   getSegPerformances(): Promise<SegmentPerformances> {
+    if (this.segPerfs !== null) return new Promise(resolve => resolve(this.segPerfs));
     return this.dbService.getByIndex("key", "segPerfs").then(segPerfs => {
       if (segPerfs === undefined) return this.getSegPerformancesFromDb();
-      else return new SegmentPerformances(JSON.parse(segPerfs.value)._segmentPerformances);
+      else {
+        const segPerfsToReturn: SegmentPerformances = new SegmentPerformances(
+          JSON.parse(segPerfs.value)._segmentPerformances
+        );
+        this.segPerfs = segPerfsToReturn;
+        return segPerfsToReturn;
+      }
     });
   }
 
@@ -230,6 +247,7 @@ export class RidesService {
           res.docs.map(segPerf => segPerf.data() as ISegPerformance)
         );
         this.dbService.add({ key: "segPerfs", value: JSON.stringify(segPerfs) });
+        this.segPerfs = segPerfs;
         return segPerfs;
       });
   }

@@ -150,4 +150,8 @@ export class Ride {
   get nameWithLink() {
     return `<span><a href='https://www.strava.com/activities/${this.id}' target='_blank'>${this.name}</a></span>`;
   }
+
+  get prCountWithLink() {
+    return `<span><a  href='/seg-efforts-list/${this.id}' target='_blank'>${this.pr_count}</a></span>`;
+  }
 }

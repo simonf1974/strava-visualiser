@@ -54,60 +54,6 @@
         <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
     </tr>
-
-    <!-- <tr>
-      <th *ngFor="let col of columns" [ngSwitch]="col.field">
-        <input
-          *ngSwitchCase="'year'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
-        <input
-          *ngSwitchCase="'month'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
-
-        <input
-          *ngSwitchCase="'start_date_local'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
-        <input
-          *ngSwitchCase="'name'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
-
-        <input
-          *ngSwitchCase="'distance'"
-          pInputText
-          type="text"
-          placeholder="Greater Than"
-          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
-        />
-
-        <input
-          *ngSwitchCase="'moving_time'"
-          pInputText
-          type="text"
-          placeholder="Greater Than"
-          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
-        />
-
-        <input
-          *ngSwitchCase="'average_speed'"
-          pInputText
-          type="text"
-          placeholder="Greater Than"
-          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
-        />
-      </th>
-    </tr> -->
   </ng-template>
   <ng-template pTemplate="body" let-perfs let-columns="columns">
     <tr>

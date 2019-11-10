@@ -1,4 +1,4 @@
-import { ILeaderboardEntry, ISegment, ISegPerformance } from "./model";
+import { ILeaderboardEntry, ISegment, ISegPerformance, ISegEffort } from "./model";
 
 export class SegmentPerformances {
   private _segmentPerformances: SegmentPerformance[];
@@ -14,12 +14,13 @@ export class SegmentPerformances {
     return this._segmentPerformances;
   }
 
-  getSegmentEffortWithPerformance(segmentEfforts: SegmentEffort[]) {
+  getSegmentEffortWithPerformance(segmentEfforts: ISegEffort[]): SegmentEffort[] {
     return segmentEfforts.map(segEffort => {
-      segEffort.segmentPerformance = this.segmentPerformances.find(
+      const segEffortObj: SegmentEffort = Object.assign(new SegmentEffort(), segEffort);
+      segEffortObj.segmentPerformance = this.segmentPerformances.find(
         segPerf => segEffort.segment_id === segPerf.segment_id
       );
-      return segEffort;
+      return segEffortObj;
     });
   }
 }
@@ -66,4 +67,56 @@ export class SegmentEffort {
   start_date: string;
   segment: ISegment;
   segmentPerformance: SegmentPerformance;
+
+  get startTime() {
+    return this.start_date.slice(11, 19);
+  }
+
+  get segment_name_with_link() {
+    return `<span><a href='https://www.strava.com/segments/${this.segment.id}' target='_blank'>${this.segment.name}</a></span>`;
+  }
+
+  get segment_city() {
+    return this.segment.city;
+  }
+
+  get segment_average_grade() {
+    return this.segment.average_grade;
+  }
+
+  get num_times_ridden() {
+    return this.segmentPerformance === undefined ? null : this.segmentPerformance.num_times_ridden;
+  }
+
+  get rank() {
+    return this.segmentPerformance === undefined ? null : this.segmentPerformance.rank;
+  }
+
+  get people_above() {
+    return this.segmentPerformance === undefined ? null : this.segmentPerformance.people_above;
+  }
+
+  get people_below() {
+    return this.segmentPerformance === undefined ? null : this.segmentPerformance.people_below;
+  }
+
+  get pr_date() {
+    return this.segmentPerformance === undefined
+      ? null
+      : this.segmentPerformance.pr_date.slice(0, 10);
+  }
+
+  get pr_elapsed_time() {
+    return this.segmentPerformance === undefined ? null : this.segmentPerformance.pr_elapsed_time;
+  }
+
+  get top_date() {
+    return this.segmentPerformance === undefined
+      ? null
+      : this.segmentPerformance.top_date.slice(0, 10);
+  }
+
+  get top_elapsed_time() {
+    return this.segmentPerformance === undefined ? null : this.segmentPerformance.top_elapsed_time;
+  }
 }
