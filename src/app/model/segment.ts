@@ -106,7 +106,7 @@ export class SegmentEffort {
   }
 
   get secondsBehindPr() {
-    return formatTime(this.elapsed_time - this.segmentPerformance.pr_moving_time);
+    return formatTime(this.elapsed_time - this.segmentPerformance.pr_elapsed_time);
   }
 
   get avgWatts() {

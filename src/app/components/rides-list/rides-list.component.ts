@@ -1,7 +1,9 @@
 import { Component, OnInit } from "@angular/core";
 import { RidesService } from "src/app/shared/rides.service";
-import { Rides } from "../../model/ride";
+import { Rides, Ride } from "../../model/ride";
 import { FilterUtils } from "primeng/api";
+import { Router } from "@angular/router";
+import { faCoffee } from "@fortawesome/free-solid-svg-icons";
 
 @Component({
   selector: "app-rides-list",
@@ -12,8 +14,10 @@ export class RidesListComponent implements OnInit {
   rides: Rides;
   cols: any[];
   selectedColumns: any[];
+  rideDrillDowns: Ride[] = [];
+  activeIndex = 0;
 
-  constructor(private ridesService: RidesService) {}
+  constructor(private ridesService: RidesService, private router: Router) {}
 
   ngOnInit() {
     this.ridesService.getRides().then((rides: Rides) => {
@@ -28,7 +32,7 @@ export class RidesListComponent implements OnInit {
         { field: "weighted_average_watts", header: "Avg Watts" },
         { field: "average_temp", header: "Avg Temp (c)" },
         { field: "cals", header: "Cals" },
-        { field: "prCountWithLink", header: "PR Count" },
+        { field: "pr_count", header: "PR Count" },
         { field: "kudos_count", header: "Kudos" },
         { field: "achievement_count", header: "Achieve" }
       ];
@@ -39,6 +43,10 @@ export class RidesListComponent implements OnInit {
         return parseInt(filter) < value;
       };
     });
+  }
+
+  rideDrillDown(ride: Ride) {
+    this.rideDrillDowns.push(ride);
   }
 
   getColFilterType(col: string) {

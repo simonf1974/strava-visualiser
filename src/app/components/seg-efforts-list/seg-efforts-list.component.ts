@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, Input } from "@angular/core";
 import { SegmentPerformances, SegmentEffort } from "src/app/model/segment";
 import { RidesService } from "src/app/shared/rides.service";
 import { FilterUtils } from "primeng/api";
@@ -12,18 +12,17 @@ import { ActivatedRoute } from "@angular/router";
 export class SegEffortsListComponent implements OnInit {
   segPerfs: SegmentPerformances;
   segEfforts: SegmentEffort[];
-  rideId: number;
   cols: any[];
   selectedColumns: any[];
+  @Input() inputRideId: number;
 
   constructor(private ridesService: RidesService, private route: ActivatedRoute) {}
 
   ngOnInit() {
-    this.rideId = Number(this.route.snapshot.paramMap.get("id"));
     this.ridesService.getSegPerformances().then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
 
-      this.ridesService.getRideSegments(this.rideId).then(segEfforts => {
+      this.ridesService.getRideSegments(this.inputRideId).then(segEfforts => {
         this.segEfforts = this.segPerfs.getSegmentEffortWithPerformance(segEfforts);
 
         this.cols = [
@@ -42,8 +41,6 @@ export class SegEffortsListComponent implements OnInit {
           { field: "pr_elapsed_time", header: "PR Time" },
           { field: "top_elapsed_time", header: "Top Time" },
           { field: "secondsPrBehindTop", header: "PR Behind Top" }
-          // { field: "pr_date", header: "PR Date" },
-          // { field: "top_date", header: "Top Date" }
         ];
         this.selectedColumns = this.cols;
         FilterUtils["greaterThan"] = (value, filter): boolean => {

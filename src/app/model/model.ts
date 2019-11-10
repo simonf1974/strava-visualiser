@@ -1,5 +1,3 @@
-import * as FileSaver from "file-saver";
-
 export interface IRideDetails {
   ride: IRide;
   segEfforts: ISegEffort[];

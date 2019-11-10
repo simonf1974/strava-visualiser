@@ -11,7 +11,6 @@ const routes: Routes = [
   { path: "rides-chart", component: RidesChartComponent },
   { path: "rides-list", component: RidesListComponent },
   { path: "seg-perf-list", component: SegPerfListComponent },
-  { path: "seg-efforts-list/:id", component: SegEffortsListComponent },
   { path: "", redirectTo: "/rides-chart", pathMatch: "full" }
 ];
 
