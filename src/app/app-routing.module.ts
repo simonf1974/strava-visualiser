@@ -4,11 +4,12 @@ import { FirestoreCrudComponent } from "./components/firestore-crud/firestore-cr
 import { RidesChartComponent } from "./components/rides-chart/rides-chart.component";
 import { RidesListComponent } from "./components/rides-list/rides-list.component";
 import { SegPerfListComponent } from "./components/seg-perf-list/seg-perf-list.component";
-import { SegEffortsListComponent } from "./components/seg-efforts-list/seg-efforts-list.component";
+import { SegPerfChartComponent } from "./components/seg-perf-chart/seg-perf-chart.component";
 
 const routes: Routes = [
   { path: "strava-scrape", component: FirestoreCrudComponent },
   { path: "rides-chart", component: RidesChartComponent },
+  { path: "seg-perf-chart", component: SegPerfChartComponent },
   { path: "rides-list", component: RidesListComponent },
   { path: "seg-perf-list", component: SegPerfListComponent },
   { path: "", redirectTo: "/rides-chart", pathMatch: "full" }

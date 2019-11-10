@@ -110,7 +110,9 @@ export interface ILeaderboardEntry {
 }
 
 export interface IChartPoint {
-  x: string;
+  x: any;
   y: number;
   r?: number;
+  segmentId?: number;
+  date?: string;
 }

@@ -29,7 +29,17 @@ export class RidesChartComponent implements OnInit {
         fontSize: 16
       },
       legend: {
-        position: "bottom"
+        position: "top"
+      },
+      onClick: function(c, i) {
+        // const e = i[0];
+        // var y_value = this.data.datasets[e._datasetIndex].data[e._index];
+        // console.log(y_value);
+        // console.log(c);
+        // console.log(i);
+        // console.log(this.data);
+        // console.log(this.data.datasets[e._datasetIndex]);
+        // window.open(`https://www.strava.com/segments/${y_value.segmentId}`, "_blank");
       },
       scales: {
         yAxes: [

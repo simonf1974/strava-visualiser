@@ -30,6 +30,13 @@
       >
       <a
         class="nav-item nav-link"
+        [class.active]="isActive('seg-perf-chart')"
+        (click)="setActive('seg-perf-chart')"
+        routerLink="seg-perf-chart"
+        >Segments Chart</a
+      >
+      <a
+        class="nav-item nav-link"
         [class.active]="isActive('rides-list')"
         (click)="setActive('rides-list')"
         routerLink="rides-list"
@@ -40,7 +47,7 @@
         [class.active]="isActive('seg-perf-list')"
         (click)="setActive('seg-perf-list')"
         routerLink="seg-perf-list"
-        >Seg Perf List</a
+        >Segments List</a
       >
       <a
         class="nav-item nav-link"

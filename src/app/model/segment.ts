@@ -1,4 +1,4 @@
-import { ILeaderboardEntry, ISegment, ISegPerformance, ISegEffort } from "./model";
+import { ILeaderboardEntry, ISegment, ISegPerformance, ISegEffort, IChartPoint } from "./model";
 
 export class SegmentPerformances {
   private _segmentPerformances: SegmentPerformance[];
@@ -36,6 +36,28 @@ export class SegmentPerformances {
         return segEffortObj;
       })
       .filter(segEffort => segEffort.segmentPerformance !== undefined);
+  }
+
+  getSegPerfForScatter(rank?: number): IChartPoint[] {
+    return this.segmentPerformances
+      .filter((segPerf: SegmentPerformance) => {
+        if (rank !== undefined && rank !== segPerf.rank) return false;
+        if (rank === undefined && segPerf.rank < 4) return false;
+
+        return (
+          segPerf.segment_distance > 0.8 && segPerf.num_times_ridden > 1 && segPerf.num_entries > 2
+        );
+      })
+      .map((segPerf: SegmentPerformance) => {
+        return {
+          x: segPerf.num_times_ridden,
+          y: segPerf.segment.average_grade,
+          r: segPerf.num_entries,
+          segmentId: segPerf.segment_id,
+          segmentName: segPerf.segment.name,
+          segmentRank: `${segPerf.rank} / ${segPerf.num_entries}`
+        };
+      });
   }
 }
 
