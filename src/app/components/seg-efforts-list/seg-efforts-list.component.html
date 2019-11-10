@@ -49,15 +49,29 @@
         pReorderableColumn
         [ngClass]="{
           'wide-column1': col.field === 'segment_name_with_link' || col.field === 'people_below',
-          'wide-column2':
-            col.field === 'pr_date' ||
-            col.field === 'people_above' ||
-            col.field === 'top_date' ||
-            col.field === 'segment_city'
+          'wide-column2': col.field === 'people_above' || col.field === 'segment_city'
         }"
       >
         {{ col.header }}
         <p-sortIcon [field]="col.field"></p-sortIcon>
+      </th>
+    </tr>
+
+    <tr>
+      <th *ngFor="let col of columns" [ngSwitch]="getColFilterType(col.field)">
+        <input
+          *ngSwitchCase="'equals'"
+          pInputText
+          type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')"
+        />
+        <input
+          *ngSwitchCase="'greaterThan'"
+          pInputText
+          type="text"
+          placeholder=">="
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
+        />
       </th>
     </tr>
   </ng-template>

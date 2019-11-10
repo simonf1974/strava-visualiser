@@ -27,7 +27,6 @@ export class SegEffortsListComponent implements OnInit {
         { field: "startTime", header: "Start Date" },
         { field: "segment_distance", header: "Distance (km)" },
         { field: "segment_average_grade", header: "Avg Grade (%)" },
-        { field: "avgWatts", header: "Avg Watts" },
         { field: "elapsedTime", header: "Time" },
         { field: "secondsBehindPr", header: "Behind PR" },
         { field: "num_times_ridden", header: "Times Ridden" },
@@ -45,5 +44,16 @@ export class SegEffortsListComponent implements OnInit {
         return parseInt(filter) < value;
       };
     });
+  }
+
+  getColFilterType(col: string) {
+    if (
+      col === "segment_name_with_link" ||
+      col === "segment_city" ||
+      col === "people_above" ||
+      col === "people_below"
+    )
+      return "equals";
+    else return "greaterThan";
   }
 }

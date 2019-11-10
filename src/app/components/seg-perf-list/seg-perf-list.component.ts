@@ -13,21 +13,23 @@ export class SegPerfListComponent implements OnInit {
   cols: any[];
   selectedColumns: any[];
 
-  constructor(private ridesService: RidesService) {
+  constructor(private ridesService: RidesService) {}
+
+  ngOnInit() {
     this.ridesService.getSegPerformances().then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
       this.cols = [
         { field: "segment_name_with_link", header: "Name" },
         { field: "segment_city", header: "City" },
+        { field: "segment_distance", header: "Distance (km)" },
+        { field: "segment_average_grade", header: "Avg Grade (%)" },
         { field: "num_times_ridden", header: "Times Ridden" },
         { field: "rank", header: "Rank" },
-        { field: "segment_average_grade", header: "Avg Grade" },
         { field: "people_above", header: "People Above" },
         { field: "people_below", header: "People Below" },
-        { field: "pr_date", header: "PR Date" },
-        { field: "pr_elapsed_time", header: "PR Time (s)" },
-        { field: "top_date", header: "Top Date" },
-        { field: "top_elapsed_time", header: "Top Time (s)" }
+        { field: "prElapsedTime", header: "PR Time" },
+        { field: "topElapsedTime", header: "Top Time" },
+        { field: "secondsPrBehindTop", header: "PR Behind Top" }
       ];
       this.selectedColumns = this.cols;
       FilterUtils["greaterThan"] = (value, filter): boolean => {
@@ -38,5 +40,14 @@ export class SegPerfListComponent implements OnInit {
     });
   }
 
-  ngOnInit() {}
+  getColFilterType(col: string) {
+    if (
+      col === "segment_name_with_link" ||
+      col === "segment_city" ||
+      col === "people_above" ||
+      col === "people_below"
+    )
+      return "equals";
+    else return "greaterThan";
+  }
 }

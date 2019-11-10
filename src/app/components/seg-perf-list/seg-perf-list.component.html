@@ -4,7 +4,7 @@
   [value]="segPerfs.segmentPerformances"
   sortMode="multiple"
   [paginator]="true"
-  [rows]="20"
+  [rows]="15"
   [resizableColumns]="true"
   [reorderableColumns]="true"
   class="tdLessPadding"
@@ -49,9 +49,34 @@
         [pSortableColumn]="col.field"
         pResizableColumn
         pReorderableColumn
+        [ngClass]="{
+          'wide-column1':
+            col.field === 'segment_name_with_link' ||
+            col.field === 'people_below' ||
+            col.field === 'people_above',
+          'wide-column2': col.field === 'segment_city'
+        }"
       >
         {{ col.header }}
         <p-sortIcon [field]="col.field"></p-sortIcon>
+      </th>
+    </tr>
+
+    <tr>
+      <th *ngFor="let col of columns" [ngSwitch]="getColFilterType(col.field)">
+        <input
+          *ngSwitchCase="'equals'"
+          pInputText
+          type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')"
+        />
+        <input
+          *ngSwitchCase="'greaterThan'"
+          pInputText
+          type="text"
+          placeholder=">="
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
+        />
       </th>
     </tr>
   </ng-template>

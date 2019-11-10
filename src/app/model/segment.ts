@@ -66,7 +66,31 @@ export class SegmentPerformance {
   }
 
   get segment_average_grade() {
-    return this.segment.average_grade;
+    return Math.floor(this.segment.average_grade);
+  }
+
+  get segment_distance() {
+    return Math.floor((this.segment.distance / 1000) * 10) / 10;
+  }
+
+  get secondsPrBehindTop() {
+    return formatTime(this.pr_elapsed_time - this.top_elapsed_time);
+  }
+
+  get prDate() {
+    return this.pr_date.slice(0, 10);
+  }
+
+  get topDate() {
+    return this.top_date.slice(0, 10);
+  }
+
+  get prElapsedTime() {
+    return formatTime(this.pr_elapsed_time);
+  }
+
+  get topElapsedTime() {
+    return formatTime(this.top_elapsed_time);
   }
 }
 
@@ -95,18 +119,40 @@ export class SegmentEffort {
   segment: ISegment;
   segmentPerformance: SegmentPerformance;
 
-  get elapsedTime() {
-    return formatTime(this.elapsed_time);
-  }
-
   get secondsPrBehindTop() {
-    return formatTime(
-      this.segmentPerformance.pr_elapsed_time - this.segmentPerformance.top_elapsed_time
-    );
+    return this.segmentPerformance.secondsPrBehindTop;
   }
 
   get secondsBehindPr() {
     return formatTime(this.elapsed_time - this.segmentPerformance.pr_elapsed_time);
+  }
+
+  get pr_date() {
+    return this.segmentPerformance.prDate;
+  }
+
+  get top_date() {
+    return this.segmentPerformance.topDate;
+  }
+
+  get segment_distance() {
+    return Math.floor((this.segment.distance / 1000) * 10) / 10;
+  }
+
+  get pr_elapsed_time() {
+    return this.segmentPerformance.prElapsedTime;
+  }
+
+  get top_elapsed_time() {
+    return this.segmentPerformance.topElapsedTime;
+  }
+
+  get segment_name_with_link() {
+    return `<span><a href='https://www.strava.com/segments/${this.segment.id}' target='_blank'>${this.segment.name}</a></span>`;
+  }
+
+  get elapsedTime() {
+    return formatTime(this.elapsed_time);
   }
 
   get avgWatts() {
@@ -121,20 +167,12 @@ export class SegmentEffort {
     return this.start_date.slice(11, 19);
   }
 
-  get segment_name_with_link() {
-    return `<span><a href='https://www.strava.com/segments/${this.segment.id}' target='_blank'>${this.segment.name}</a></span>`;
-  }
-
   get segment_city() {
     return this.segment.city;
   }
 
   get segment_average_grade() {
     return Math.floor(this.segment.average_grade);
-  }
-
-  get segment_distance() {
-    return Math.floor((this.segment.distance / 1000) * 10) / 10;
   }
 
   get num_times_ridden() {
@@ -151,21 +189,5 @@ export class SegmentEffort {
 
   get people_below() {
     return this.segmentPerformance.people_below;
-  }
-
-  get pr_date() {
-    return this.segmentPerformance.pr_date.slice(0, 10);
-  }
-
-  get pr_elapsed_time() {
-    return formatTime(this.segmentPerformance.pr_elapsed_time);
-  }
-
-  get top_date() {
-    return this.segmentPerformance.top_date.slice(0, 10);
-  }
-
-  get top_elapsed_time() {
-    return formatTime(this.segmentPerformance.top_elapsed_time);
   }
 }
