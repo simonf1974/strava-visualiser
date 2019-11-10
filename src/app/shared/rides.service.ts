@@ -177,10 +177,18 @@ export class RidesService {
     });
   }
 
-  getRideSegments(rideId: number): Promise<ISegEffort[]> {
-    return this.dbService.getByIndex("key", rideId).then(segEfforts => {
-      if (segEfforts === undefined) return this.getRideSegmentsFromDb(rideId);
-      else return JSON.parse(segEfforts.value).seg_efforts;
+  getRideSegments(rideId: number): Promise<SegmentEffort[]> {
+    return this.getSegPerformances().then((segPerfs: SegmentPerformances) => {
+      return this.dbService.getByIndex("key", rideId).then(seFromLocalDb => {
+        if (seFromLocalDb === undefined)
+          return this.getRideSegmentsFromDb(rideId).then((seFromDb: ISegEffort[]) =>
+            segPerfs.getSegmentEffortWithPerformance(seFromDb)
+          );
+        else
+          return segPerfs.getSegmentEffortWithPerformance(
+            JSON.parse(seFromLocalDb.value).seg_efforts
+          );
+      });
     });
   }
 

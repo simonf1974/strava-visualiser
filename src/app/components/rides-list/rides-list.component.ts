@@ -32,9 +32,9 @@ export class RidesListComponent implements OnInit {
         { field: "weighted_average_watts", header: "Avg Watts" },
         { field: "average_temp", header: "Avg Temp (c)" },
         { field: "cals", header: "Cals" },
+        { field: "achievement_count", header: "Achieve" },
         { field: "pr_count", header: "PR Count" },
-        { field: "kudos_count", header: "Kudos" },
-        { field: "achievement_count", header: "Achieve" }
+        { field: "kudos_count", header: "Kudos" }
       ];
       this.selectedColumns = this.cols;
       FilterUtils["greaterThan"] = (value, filter): boolean => {
