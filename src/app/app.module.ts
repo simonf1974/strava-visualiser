@@ -21,10 +21,10 @@ import { NgxIndexedDBModule, DBConfig } from "ngx-indexed-db";
 
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
-import { GraphComponent } from "./components/graph/graph.component";
 
 import { RidesService } from "./shared/rides.service";
 import { StravaService } from "./shared/strava.service";
+import { DatabaseService } from "./shared/database.service";
 
 import { environment } from "src/environments/environment";
 import { AngularFireModule } from "@angular/fire";
@@ -36,7 +36,7 @@ import { RidesChartComponent } from "./components/rides-chart/rides-chart.compon
 import { SegPerfListComponent } from "./components/seg-perf-list/seg-perf-list.component";
 import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
 import { SegEffortsListComponent } from "./components/seg-efforts-list/seg-efforts-list.component";
-import { SegPerfChartComponent } from './components/seg-perf-chart/seg-perf-chart.component';
+import { SegPerfChartComponent } from "./components/seg-perf-chart/seg-perf-chart.component";
 
 const dbConfig: DBConfig = {
   name: "MyDb",
@@ -56,7 +56,6 @@ const dbConfig: DBConfig = {
 @NgModule({
   declarations: [
     AppComponent,
-    GraphComponent,
     FirestoreCrudComponent,
     RidesListComponent,
     RidesChartComponent,
@@ -88,7 +87,7 @@ const dbConfig: DBConfig = {
     TabViewModule,
     FontAwesomeModule
   ],
-  providers: [RidesService, StravaService],
+  providers: [RidesService, StravaService, DatabaseService],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
