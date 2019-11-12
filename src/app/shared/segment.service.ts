@@ -51,17 +51,19 @@ export class SegmentService {
 
   getSegPerformances(): Promise<SegmentPerformances> {
     if (this.segPerfs !== null) return new Promise(resolve => resolve(this.segPerfs));
-    return this.localDbService.getByIndex("key", "segPerfs").then(segPerfs => {
-      if (segPerfs === undefined) return this.getSegPerformancesFromDb();
-      else {
-        const segPerfsToReturn: SegmentPerformances = new SegmentPerformances(
-          JSON.parse(segPerfs.value)._segmentPerformances,
-          null
-        );
-        this.segPerfs = segPerfsToReturn;
-        return segPerfsToReturn;
-      }
-    });
+    return this.localDbService
+      .getByIndex(this.remoteDbService.localDb.key, this.remoteDbService.localDb.segPerfs)
+      .then(segPerfs => {
+        if (segPerfs === undefined) return this.getSegPerformancesFromDb();
+        else {
+          const segPerfsToReturn: SegmentPerformances = new SegmentPerformances(
+            JSON.parse(segPerfs.value)._segmentPerformances,
+            null
+          );
+          this.segPerfs = segPerfsToReturn;
+          return segPerfsToReturn;
+        }
+      });
   }
 
   private getSegPerformancesFromDb(): Promise<SegmentPerformances> {
@@ -85,7 +87,7 @@ export class SegmentService {
     segPerfsNumEntries: ISegPerformance[]
   ): Promise<SegmentPerformances> {
     return this.firestore
-      .collection("segment_performance", (ref: CollectionReference) =>
+      .collection(this.remoteDbService.collections.segmentPerformance, (ref: CollectionReference) =>
         ref
           .where("num_times_ridden", ">", 1)
           .orderBy("num_times_ridden", "desc")
@@ -98,7 +100,10 @@ export class SegmentService {
           segPerfsNumEntries,
           res.docs.map(segPerf => segPerf.data() as ISegPerformance)
         );
-        this.localDbService.add({ key: "segPerfs", value: JSON.stringify(segPerfs) });
+        this.localDbService.add({
+          key: this.remoteDbService.localDb.segPerfs,
+          value: JSON.stringify(segPerfs)
+        });
         this.segPerfs = segPerfs;
         return segPerfs;
       });
