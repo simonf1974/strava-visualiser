@@ -1,5 +1,6 @@
 import { Component, OnInit } from "@angular/core";
 import { RidesService } from "../../shared/rides.service";
+import { ICalls } from "src/app/model/model";
 
 @Component({
   selector: "app-firestore-crud",
@@ -7,7 +8,7 @@ import { RidesService } from "../../shared/rides.service";
   styleUrls: ["./firestore-crud.component.scss"]
 })
 export class FirestoreCrudComponent implements OnInit {
-  calls = {};
+  calls: ICalls;
   apiCallsProgress: number = 60;
   dbReadsProgress: number;
   dbWritesProgress: number;

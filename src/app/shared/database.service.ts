@@ -9,15 +9,6 @@ import { firestore, FirebaseError } from "firebase";
 export class DatabaseService {
   incrementCount: BehaviorSubject<any>;
   propagateMsg: BehaviorSubject<any>;
-  collections: {
-    segmentPerformance: "segment_performance";
-    rides: "rides";
-  };
-  localDb: {
-    key: "key";
-    rides: "rides";
-    segPerfs: "segPerfs";
-  };
 
   private batches: Map<number, [firestore.WriteBatch, number]> = new Map<
     number,

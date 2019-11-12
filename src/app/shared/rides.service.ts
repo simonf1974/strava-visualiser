@@ -9,7 +9,9 @@ import {
   IRideDetails,
   ISegEffort,
   ISegPerfPreUpdate,
-  ISegPerfPreSave
+  ISegPerfPreSave,
+  ICalls,
+  collections
 } from "../model/model";
 import { Rides } from "../model/ride";
 import { NgxIndexedDBService } from "ngx-indexed-db";
@@ -20,7 +22,7 @@ import { SegmentService } from "./segment.service";
   providedIn: "root"
 })
 export class RidesService {
-  private _calls = {
+  private _calls: ICalls = {
     numStravaApiCallsMade: 0,
     numStravaApiCallsDone: 0,
     numDbReadsMade: 0,
@@ -87,19 +89,15 @@ export class RidesService {
   }
 
   private processRide(rideId: number): void {
-    this.remoteDbService
-      .getByKey(this.remoteDbService.collections.rides, rideId)
-      .then((rideFromDb: IRide) => {
-        if (rideFromDb !== null && rideFromDb === undefined) {
-          this.stravaService.getRide(rideId).then((rideDetails: IRideDetails) => {
-            if (rideDetails !== null) this.saveRideDetails(rideDetails);
-            else
-              console.log(
-                "Ride details are null, I'm guessing there was an error getting the ride"
-              );
-          });
-        }
-      });
+    this.remoteDbService.getByKey(collections.rides, rideId).then((rideFromDb: IRide) => {
+      if (rideFromDb !== null && rideFromDb === undefined) {
+        this.stravaService.getRide(rideId).then((rideDetails: IRideDetails) => {
+          if (rideDetails !== null) this.saveRideDetails(rideDetails);
+          else
+            console.log("Ride details are null, I'm guessing there was an error getting the ride");
+        });
+      }
+    });
   }
 
   private saveRideDetails(rideDetails: IRideDetails): void {
@@ -109,7 +107,7 @@ export class RidesService {
     this.remoteDbService.startBatch(rideDetails.ride.id);
 
     this.remoteDbService.addDataToBatch(
-      this.remoteDbService.collections.rides,
+      collections.rides,
       rideDetails.ride.id,
       rideDetails.ride,
       rideDetails.ride.id
@@ -117,7 +115,7 @@ export class RidesService {
 
     rideDetails.segEfforts.forEach((segEffort: ISegEffort) => {
       this.remoteDbService.addDataToBatch(
-        this.remoteDbService.collections.segmentPerformance,
+        collections.segmentPerformance,
         [segEffort.segment_id, rideDetails.ride.athlete_id],
         this.mergeSegEffortAndSegPerf(segEffort, rideDetails.ride.athlete_id),
 
@@ -176,7 +174,7 @@ export class RidesService {
     leaderboard: ISegPerfPreUpdate
   ): void {
     this.remoteDbService.updateData(
-      this.remoteDbService.collections.segmentPerformance,
+      collections.segmentPerformance,
       [segPerformance.segment_id, segPerformance.athlete_id],
       leaderboard
     );
