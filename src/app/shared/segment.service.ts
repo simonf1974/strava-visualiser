@@ -11,7 +11,6 @@ import { Observable, BehaviorSubject } from "rxjs";
 })
 export class SegmentService {
   private segPerfs: SegmentPerformances = null;
-  private segPerfCollection = "segment_performance";
   incrementCount: BehaviorSubject<any>;
   propagateMsg: BehaviorSubject<any>;
 
@@ -22,6 +21,10 @@ export class SegmentService {
   ) {
     this.incrementCount = new BehaviorSubject(null);
     this.propagateMsg = new BehaviorSubject(null);
+  }
+
+  clearLocalDb() {
+    this.segPerfs = null;
   }
 
   getRideSegments(rideId: number): Promise<SegmentEffort[]> {
@@ -63,7 +66,7 @@ export class SegmentService {
 
   private getSegPerformancesFromDb(): Promise<SegmentPerformances> {
     return this.firestore
-      .collection(this.segPerfCollection, (ref: CollectionReference) =>
+      .collection(this.remoteDbService.collections.segmentPerformance, (ref: CollectionReference) =>
         ref
           .where("num_entries", ">", 1)
           .orderBy("num_entries", "desc")

@@ -115,7 +115,7 @@ export class RidesService {
 
     rideDetails.segEfforts.forEach((segEffort: ISegEffort) => {
       this.remoteDbService.addDataToBatch(
-        this.segPerfCollection,
+        this.remoteDbService.collections.segmentPerformance,
         [segEffort.segment_id, rideDetails.ride.athlete_id],
         this.mergeSegEffortAndSegPerf(segEffort, rideDetails.ride.athlete_id),
 
@@ -138,7 +138,7 @@ export class RidesService {
   refreshPerformanceData(): void {
     const segmentsToRefresh: number[] = [];
 
-    this.getPerformanceDataToRefresh().subscribe(
+    this.segmentService.getPerformanceDataToRefresh().subscribe(
       (perfData: ISegPerformance[]) => {
         this.incrementCount("numDbReadsDone");
         perfData.forEach((segPerformance: ISegPerformance) => {
@@ -174,7 +174,7 @@ export class RidesService {
     leaderboard: ISegPerfPreUpdate
   ): void {
     this.remoteDbService.updateData(
-      this.segPerfCollection,
+      this.remoteDbService.collections.segmentPerformance,
       [segPerformance.segment_id, segPerformance.athlete_id],
       leaderboard
     );
@@ -186,7 +186,7 @@ export class RidesService {
     this.incrementCount("numDbWritesMade");
     this.dbService.clear().then(res => {
       this.rides = null;
-      this.segPerfs = null;
+      this.segmentService.clearLocalDb();
       this.incrementCount("numDbWritesDone");
     });
   }

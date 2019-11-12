@@ -1,8 +1,8 @@
 import { Component, OnInit, Input } from "@angular/core";
 import { SegmentEffort } from "src/app/model/segment";
-import { RidesService } from "src/app/shared/rides.service";
 import { FilterUtils } from "primeng/api";
 import { ActivatedRoute } from "@angular/router";
+import { SegmentService } from "src/app/shared/segment.service";
 
 @Component({
   selector: "app-seg-efforts-list",
@@ -15,10 +15,10 @@ export class SegEffortsListComponent implements OnInit {
   selectedColumns: any[];
   @Input() inputRideId: number;
 
-  constructor(private ridesService: RidesService, private route: ActivatedRoute) {}
+  constructor(private segmentService: SegmentService, private route: ActivatedRoute) {}
 
   ngOnInit() {
-    this.ridesService.getRideSegments(this.inputRideId).then((segEfforts: SegmentEffort[]) => {
+    this.segmentService.getRideSegments(this.inputRideId).then((segEfforts: SegmentEffort[]) => {
       this.segEfforts = segEfforts;
 
       this.cols = [

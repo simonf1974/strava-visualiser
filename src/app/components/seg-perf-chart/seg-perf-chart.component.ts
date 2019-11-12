@@ -1,6 +1,6 @@
 import { Component, OnInit } from "@angular/core";
-import { RidesService } from "src/app/shared/rides.service";
 import { SegmentPerformances } from "src/app/model/segment";
+import { SegmentService } from "src/app/shared/segment.service";
 
 @Component({
   selector: "app-seg-perf-chart",
@@ -12,7 +12,7 @@ export class SegPerfChartComponent implements OnInit {
   options: any;
   segPerfs: SegmentPerformances;
 
-  constructor(private ridesService: RidesService) {}
+  constructor(private segmentService: SegmentService) {}
 
   ngOnInit() {
     this.getSegPerfs();
@@ -96,7 +96,7 @@ export class SegPerfChartComponent implements OnInit {
   }
 
   getSegPerfs() {
-    this.ridesService.getSegPerformances().then((segPerfs: SegmentPerformances) => {
+    this.segmentService.getSegPerformances().then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
 
       this.data = {
