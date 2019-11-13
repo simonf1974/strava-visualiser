@@ -22,10 +22,6 @@ import { NgxIndexedDBModule, DBConfig } from "ngx-indexed-db";
 import { AppRoutingModule } from "./app-routing.module";
 import { AppComponent } from "./app.component";
 
-import { RidesService } from "./shared/rides.service";
-import { StravaService } from "./shared/strava.service";
-import { DatabaseService } from "./shared/database.service";
-
 import { environment } from "src/environments/environment";
 import { AngularFireModule } from "@angular/fire";
 import { AngularFirestoreModule } from "@angular/fire/firestore";
@@ -87,7 +83,7 @@ const dbConfig: DBConfig = {
     TabViewModule,
     FontAwesomeModule
   ],
-  providers: [RidesService, StravaService, DatabaseService],
+  providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {}

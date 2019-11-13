@@ -2,8 +2,8 @@ import { Injectable } from "@angular/core";
 import { Rides } from "../model/ride";
 import { IRide } from "../model/model";
 import { AngularFirestore } from "@angular/fire/firestore";
-import { NgxIndexedDBService } from "ngx-indexed-db";
 import { BehaviorSubject } from "rxjs";
+import { LocaldbService } from "./localdb.service";
 
 @Injectable({
   providedIn: "root"
@@ -13,10 +13,9 @@ export class RideService {
   incrementCount: BehaviorSubject<any>;
   propagateMsg: BehaviorSubject<any>;
 
-  constructor(private localDbService: NgxIndexedDBService, private firestore: AngularFirestore) {
+  constructor(private localDbService: LocaldbService, private firestore: AngularFirestore) {
     this.incrementCount = new BehaviorSubject(null);
     this.propagateMsg = new BehaviorSubject(null);
-    localDbService.currentStore = "ridecache";
   }
 
   clearLocalDb() {
@@ -25,7 +24,7 @@ export class RideService {
 
   get(): Promise<Rides> {
     if (this.rides !== null) return new Promise(resolve => resolve(this.rides));
-    return this.localDbService.getByIndex("key", "rides").then(rides => {
+    return this.localDbService.get("rides").then(rides => {
       if (rides === undefined) return this.getFromDb();
       else {
         const ridesToReturn: Rides = new Rides(JSON.parse(rides.value)._rides);
@@ -43,7 +42,7 @@ export class RideService {
       .then(res => {
         console.log("got rides from db");
         const rides = new Rides(res.docs.map(ride => ride.data() as IRide));
-        this.localDbService.add({ key: "rides", value: JSON.stringify(rides) });
+        this.localDbService.add("rides", JSON.stringify(rides));
         this.rides = rides;
         return rides;
       });

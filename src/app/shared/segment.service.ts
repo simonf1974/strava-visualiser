@@ -1,10 +1,10 @@
 import { Injectable } from "@angular/core";
 import { DatabaseService } from "./database.service";
 import { SegmentPerformances, SegmentEffort } from "../model/segment";
-import { NgxIndexedDBService } from "ngx-indexed-db";
 import { ISegEffort, ISegPerformance, collections, localDb, columns } from "../model/model";
 import { CollectionReference, AngularFirestore } from "@angular/fire/firestore";
 import { Observable, BehaviorSubject } from "rxjs";
+import { LocaldbService } from "./localdb.service";
 
 @Injectable({
   providedIn: "root"
@@ -16,12 +16,11 @@ export class SegmentService {
 
   constructor(
     private remoteDbService: DatabaseService,
-    private localDbService: NgxIndexedDBService,
+    private localDbService: LocaldbService,
     private firestore: AngularFirestore
   ) {
     this.incrementCount = new BehaviorSubject(null);
     this.propagateMsg = new BehaviorSubject(null);
-    localDbService.currentStore = "ridecache";
   }
 
   clearLocalDb() {
@@ -30,7 +29,7 @@ export class SegmentService {
 
   getRideSegments(rideId: number): Promise<SegmentEffort[]> {
     return this.get().then((segPerfs: SegmentPerformances) => {
-      return this.localDbService.getByIndex(localDb.key, rideId).then(seFromLocalDb => {
+      return this.localDbService.get(rideId).then(seFromLocalDb => {
         if (seFromLocalDb === undefined)
           return this.getRideSegmentsFromDb(rideId).then((seFromDb: ISegEffort[]) =>
             segPerfs.getSegmentEffortWithPerformance(seFromDb)
@@ -45,14 +44,14 @@ export class SegmentService {
 
   private getRideSegmentsFromDb(rideId: number): Promise<ISegEffort[]> {
     return this.remoteDbService.getByKey(collections.rideSegEfforts, rideId).then(segEfforts => {
-      this.localDbService.add({ key: rideId, value: JSON.stringify(segEfforts) });
+      this.localDbService.add(rideId, JSON.stringify(segEfforts));
       return segEfforts.seg_efforts;
     });
   }
 
   get(): Promise<SegmentPerformances> {
     if (this.segPerfs !== null) return new Promise(resolve => resolve(this.segPerfs));
-    return this.localDbService.getByIndex(localDb.key, localDb.segPerfs).then(segPerfs => {
+    return this.localDbService.get(localDb.segPerfs).then(segPerfs => {
       if (segPerfs === undefined) return this.getFromDb();
       else {
         const segPerfsToReturn: SegmentPerformances = new SegmentPerformances(
@@ -97,10 +96,7 @@ export class SegmentService {
           segPerfsNumEntries,
           res.docs.map(segPerf => segPerf.data() as ISegPerformance)
         );
-        this.localDbService.add({
-          key: localDb.segPerfs,
-          value: JSON.stringify(segPerfs)
-        });
+        this.localDbService.add(localDb.segPerfs, JSON.stringify(segPerfs));
         this.segPerfs = segPerfs;
         return segPerfs;
       });

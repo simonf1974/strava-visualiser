@@ -1,5 +1,4 @@
 import { Injectable } from "@angular/core";
-import { AngularFirestore } from "@angular/fire/firestore";
 import { BehaviorSubject } from "rxjs";
 import { firestore, FirebaseError } from "firebase";
 import { StravaService } from "./strava.service";
@@ -13,11 +12,10 @@ import {
   ICalls,
   collections
 } from "../model/model";
-import { Rides } from "../model/ride";
-import { NgxIndexedDBService } from "ngx-indexed-db";
 import { DatabaseService } from "./database.service";
 import { SegmentService } from "./segment.service";
 import { RideService } from "./ride.service";
+import { LocaldbService } from "./localdb.service";
 
 @Injectable({
   providedIn: "root"
@@ -34,7 +32,6 @@ export class RidesService {
     databaseMsg: ""
   };
   calls: BehaviorSubject<any>;
-  // private rides: Rides = null;
 
   private batches: Map<number, [firestore.WriteBatch, number]> = new Map<
     number,
@@ -42,9 +39,8 @@ export class RidesService {
   >();
 
   constructor(
-    // private firestore: AngularFirestore,
     private stravaService: StravaService,
-    private dbService: NgxIndexedDBService,
+    private localDbService: LocaldbService,
     private remoteDbService: DatabaseService,
     private segmentService: SegmentService,
     private rideService: RideService
@@ -54,7 +50,6 @@ export class RidesService {
     this.initMsgPropogation(this.remoteDbService);
     this.initMsgPropogation(this.segmentService);
     this.initMsgPropogation(this.rideService);
-    dbService.currentStore = "ridecache";
   }
 
   private initMsgPropogation(service) {
@@ -187,38 +182,12 @@ export class RidesService {
 
   clearLocalDb() {
     this.incrementCount("numDbWritesMade");
-    this.dbService.clear().then(res => {
+    this.localDbService.clear().then(res => {
       this.rideService.clearLocalDb();
       this.segmentService.clearLocalDb();
       this.incrementCount("numDbWritesDone");
     });
   }
-
-  // getRides(): Promise<Rides> {
-  //   if (this.rides !== null) return new Promise(resolve => resolve(this.rides));
-  //   return this.dbService.getByIndex("key", "rides").then(rides => {
-  //     if (rides === undefined) return this.getRidesFromDb();
-  //     else {
-  //       const ridesToReturn: Rides = new Rides(JSON.parse(rides.value)._rides);
-  //       this.rides = ridesToReturn;
-  //       return ridesToReturn;
-  //     }
-  //   });
-  // }
-
-  // private getRidesFromDb(): Promise<Rides> {
-  //   return this.firestore
-  //     .collection("rides", ref => ref.limit(5000))
-  //     .get()
-  //     .toPromise()
-  //     .then(res => {
-  //       console.log("got rides from db");
-  //       const rides = new Rides(res.docs.map(ride => ride.data() as IRide));
-  //       this.dbService.add({ key: "rides", value: JSON.stringify(rides) });
-  //       this.rides = rides;
-  //       return rides;
-  //     });
-  // }
 
   //API to database mapping
 
