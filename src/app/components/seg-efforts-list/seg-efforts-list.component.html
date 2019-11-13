@@ -1,38 +1,16 @@
-<p-table
-  #dt
-  [columns]="selectedColumns"
-  [value]="segEfforts"
-  sortMode="multiple"
-  [paginator]="true"
-  [rows]="15"
-  [resizableColumns]="true"
-  [reorderableColumns]="true"
-  class="tdLessPadding"
->
+<p-table #dt [columns]="selectedColumns" [value]="segEfforts" sortMode="multiple" [paginator]="true" [rows]="15"
+  [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding">
   <ng-template pTemplate="caption">
     <div class="caption-container">
       <div style="text-align:left">
-        <p-multiSelect
-          [options]="cols"
-          [(ngModel)]="selectedColumns"
-          optionLabel="header"
-          selectedItemsLabel="{0} columns selected"
-          [style]="{ minWidth: '200px' }"
-          defaultLabel="Choose Columns"
-        >
+        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
+          selectedItemsLabel="{0} columns selected" [style]="{ minWidth: '200px' }" defaultLabel="Choose Columns">
         </p-multiSelect>
       </div>
-
       <div style="text-align: right">
         <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
-        <input
-          type="text"
-          pInputText
-          size="50"
-          placeholder="Global Filter"
-          (input)="dt.filterGlobal($event.target.value, 'contains')"
-          style="width:auto"
-        />
+        <input type="text" pInputText size="50" placeholder="Global Filter"
+          (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto" />
       </div>
     </div>
   </ng-template>
@@ -41,17 +19,11 @@
 
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
-      <th
-        class="table-header"
-        *ngFor="let col of columns"
-        [pSortableColumn]="col.field"
-        pResizableColumn
-        pReorderableColumn
-        [ngClass]="{
+      <th class="table-header" *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn
+        pReorderableColumn [ngClass]="{
           'wide-column1': col.field === 'segment_name_with_link' || col.field === 'people_below',
           'wide-column2': col.field === 'people_above' || col.field === 'segment_city'
-        }"
-      >
+        }">
         {{ col.header }}
         <p-sortIcon [field]="col.field"></p-sortIcon>
       </th>
@@ -59,19 +31,10 @@
 
     <tr>
       <th *ngFor="let col of columns" [ngSwitch]="getColFilterType(col.field)">
-        <input
-          *ngSwitchCase="'equals'"
-          pInputText
-          type="text"
-          (input)="dt.filter($event.target.value, col.field, 'contains')"
-        />
-        <input
-          *ngSwitchCase="'greaterThan'"
-          pInputText
-          type="text"
-          placeholder=">="
-          (input)="dt.filter($event.target.value, col.field, 'greaterThan')"
-        />
+        <input *ngSwitchCase="'equals'" pInputText type="text"
+          (input)="dt.filter($event.target.value, col.field, 'contains')" />
+        <input *ngSwitchCase="'greaterThan'" pInputText type="text" placeholder=">="
+          (input)="dt.filter($event.target.value, col.field, 'greaterThan')" />
       </th>
     </tr>
   </ng-template>

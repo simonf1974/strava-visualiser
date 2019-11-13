@@ -10,10 +10,10 @@ import { FilterUtils } from "primeng/api";
 export class RidesListComponent implements OnInit {
   cols: any[];
   selectedColumns: any[];
-
-  constructor() {}
   @Input() rides: Rides;
   @Output() rideSelected = new EventEmitter();
+
+  constructor() {}
 
   ngOnInit() {
     this.cols = [

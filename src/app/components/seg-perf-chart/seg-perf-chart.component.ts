@@ -30,8 +30,6 @@ export class SegPerfChartComponent implements OnInit {
       tooltips: {
         callbacks: {
           label: function(tooltipItem, data) {
-            // console.log(tooltipItem, data);
-            // console.log(data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index]);
             const myData = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
             return [
               myData.segmentName,
@@ -39,13 +37,6 @@ export class SegPerfChartComponent implements OnInit {
               `Segment Rank: ${myData.segmentRank}`,
               `Avg Grade: ${Math.floor(myData.y)}%`
             ];
-
-            // var label = data.datasets[tooltipItem.datasetIndex].label || "";
-            // if (label) {
-            //   label += ": ";
-            // }
-            // label += Math.round(tooltipItem.yLabel * 100) / 100;
-            // return label;
           }
         }
       },
@@ -62,15 +53,6 @@ export class SegPerfChartComponent implements OnInit {
       scales: {
         yAxes: [
           {
-            ticks: {
-              // beginAtZero: true
-              // callback: function(label, index, labels) {
-              //   return label.toLocaleString() + " km";
-              // }
-            },
-            // stacked: true,
-            // position: "right",
-            // id: "km",
             scaleLabel: {
               display: true,
               labelString: "Average Grade of Segment (%)"
@@ -79,12 +61,6 @@ export class SegPerfChartComponent implements OnInit {
         ],
         xAxes: [
           {
-            // type: "time",
-            // time: {
-            //   unit: "year"
-            // },
-            // stacked: true,
-            // offset: true
             scaleLabel: {
               display: true,
               labelString: "Number of Times Segment Ridden"
@@ -98,7 +74,6 @@ export class SegPerfChartComponent implements OnInit {
   getSegPerfs() {
     this.segmentService.get().then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
-
       this.data = {
         datasets: [
           {

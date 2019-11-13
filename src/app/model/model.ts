@@ -154,5 +154,4 @@ export interface IChartPoint {
   y: number;
   r?: number;
   segmentId?: number;
-  date?: string;
 }

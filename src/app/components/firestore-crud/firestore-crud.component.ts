@@ -9,7 +9,7 @@ import { ICalls } from "src/app/model/model";
 })
 export class FirestoreCrudComponent implements OnInit {
   calls: ICalls;
-  apiCallsProgress: number = 60;
+  apiCallsProgress: number;
   dbReadsProgress: number;
   dbWritesProgress: number;
   apiCallsMessage: string;
@@ -60,11 +60,5 @@ export class FirestoreCrudComponent implements OnInit {
         this.dbWritesMessage = "No calls made yet";
       }
     });
-
-    // localStorage.setItem("hh", "hf");
-
-    // console.log(localStorage.getItem("hh"));
-
-    // this.ridesService.getSegPerformances();
   }
 }
