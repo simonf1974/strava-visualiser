@@ -1,27 +1,27 @@
 <p-table #dt [columns]="selectedColumns" [value]="rides.rides" sortMode="multiple" [paginator]="true" [rows]="20"
-  [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding">
+  [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding" dataKey="id">
   <ng-template pTemplate="caption">
-    <div class="caption-container">
+    There are {{ rides.rides.length }} rides
+    <!-- <div class="caption-container">
       <div style="text-align:left">
         <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
           selectedItemsLabel="{0} columns selected" [style]="{ minWidth: '200px' }" defaultLabel="Choose Columns">
         </p-multiSelect>
       </div>
-
       <div style="text-align: right">
         <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
         <input type="text" pInputText size="50" placeholder="Global Filter"
           (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto" />
       </div>
-    </div>
+    </div> -->
   </ng-template>
 
-  <ng-template pTemplate="summary"> There are {{ rides.rides.length }} rides </ng-template>
+  <!-- <ng-template pTemplate="summary"> There are {{ rides.rides.length }} rides </ng-template> -->
 
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
+      <th style="width: 3em"></th>
       <th style="width:4em"></th>
-
       <th class="table-header" *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn
         pReorderableColumn [ngClass]="{
               'wide-column1': col.field === 'nameWithLink',
@@ -34,6 +34,7 @@
 
     <tr>
       <th></th>
+      <th></th>
       <th *ngFor="let col of columns" [ngSwitch]="getColFilterType(col.field)">
         <input *ngSwitchCase="'equals'" pInputText type="text"
           (input)="dt.filter($event.target.value, col.field, 'contains')" />
@@ -42,8 +43,13 @@
       </th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-ride let-columns="columns">
+  <ng-template pTemplate="body" let-ride let-expanded="expanded" let-columns="columns">
     <tr>
+      <td>
+        <a href="#" [pRowToggler]="ride">
+          <i [ngClass]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+        </a>
+      </td>
       <td>
         <button pButton icon="fa fa-search" (click)="rideDrillDown(ride)"></button>
       </td>
@@ -52,4 +58,43 @@
       </td>
     </tr>
   </ng-template>
+
+
+  <ng-template pTemplate="rowexpansion" let-ride let-columns="columns">
+    <tr>
+      <td [attr.colspan]="columns.length + 2">
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Distance:</b> {{ ride.distance }} km
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Moving Time:</b> {{ ride.movingTimeFormatted }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Average Speed:</b> {{ ride.average_speed }} kph
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Elevation gain:</b> {{ ride.total_elevation_gain }} m
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Average Watts:</b> {{ ride.weighted_average_watts }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Average Temp:</b> {{ ride.average_temp }}c
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Calories:</b> {{ ride.cals }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Achievements:</b> {{ ride.achievement_count }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>PR Count:</b> {{ ride.pr_count }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Kudos:</b> {{ ride.kudos_count }}
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
 </p-table>

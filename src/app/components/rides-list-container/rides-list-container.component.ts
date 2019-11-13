@@ -1,11 +1,12 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, ViewEncapsulation } from "@angular/core";
 import { RideService } from "src/app/shared/ride.service";
 import { Rides, Ride } from "src/app/model/ride";
 
 @Component({
   selector: "app-rides-list-container",
   templateUrl: "./rides-list-container.component.html",
-  styleUrls: ["./rides-list-container.component.scss"]
+  styleUrls: ["./rides-list-container.component.scss"],
+  encapsulation: ViewEncapsulation.None
 })
 export class RidesListContainerComponent implements OnInit {
   rides: Rides;

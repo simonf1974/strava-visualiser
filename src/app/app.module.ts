@@ -2,6 +2,7 @@ import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { NgModule } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { LayoutModule } from "@angular/cdk/layout";
 
 import { TableModule } from "primeng/table";
 import { MultiSelectModule } from "primeng/multiselect";
@@ -33,7 +34,7 @@ import { SegPerfListComponent } from "./components/seg-perf-list/seg-perf-list.c
 import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
 import { SegEffortsListComponent } from "./components/seg-efforts-list/seg-efforts-list.component";
 import { SegPerfChartComponent } from "./components/seg-perf-chart/seg-perf-chart.component";
-import { RidesListContainerComponent } from './components/rides-list-container/rides-list-container.component';
+import { RidesListContainerComponent } from "./components/rides-list-container/rides-list-container.component";
 
 const dbConfig: DBConfig = {
   name: "MyDb",
@@ -83,7 +84,8 @@ const dbConfig: DBConfig = {
     AccordionModule,
     NgxIndexedDBModule.forRoot(dbConfig),
     TabViewModule,
-    FontAwesomeModule
+    FontAwesomeModule,
+    LayoutModule
   ],
   providers: [],
   bootstrap: [AppComponent]

@@ -1,9 +1,13 @@
+// .caption {
+//   display: none;
+
+// }
+
 .caption-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
-
 input {
   width: 100%;
 }
@@ -21,3 +25,9 @@ input {
 .wide-column2 {
   width: 100px;
 }
+
+// @media only screen and (min-width: 600px) {
+//   .caption {
+//     display: unset;
+//   }
+// }
