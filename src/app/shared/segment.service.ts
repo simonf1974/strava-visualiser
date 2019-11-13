@@ -1,7 +1,14 @@
 import { Injectable } from "@angular/core";
 import { DatabaseService } from "./database.service";
 import { SegmentPerformances, SegmentEffort } from "../model/segment";
-import { ISegEffort, ISegPerformance, collections, localDb, columns } from "../model/model";
+import {
+  ISegEffort,
+  ISegPerformance,
+  collections,
+  localDb,
+  columns,
+  ISegPerfPreUpdate
+} from "../model/model";
 import { CollectionReference, AngularFirestore } from "@angular/fire/firestore";
 import { Observable, BehaviorSubject } from "rxjs";
 import { LocaldbService } from "./localdb.service";
@@ -109,5 +116,13 @@ export class SegmentService {
         ref.where(columns.requiresRefresh, "==", true).limit(10)
       )
       .valueChanges();
+  }
+
+  updateWithLeaderboard(segPerformance: ISegPerformance, leaderboard: ISegPerfPreUpdate): void {
+    this.remoteDbService.update(
+      collections.segmentPerformance,
+      [segPerformance.segment_id, segPerformance.athlete_id],
+      leaderboard
+    );
   }
 }

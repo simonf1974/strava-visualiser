@@ -72,6 +72,15 @@ export class RidesService {
     this.calls.next(this._calls);
   }
 
+  clearLocalDb() {
+    this.incrementCount(calls.numDbWritesMade);
+    this.localDbService.clear().then(res => {
+      this.rideService.clearLocalDb();
+      this.segmentService.clearLocalDb();
+      this.incrementCount(calls.numDbWritesDone);
+    });
+  }
+
   // Main logic for scraping Strava data and saving to database
 
   scrapeStravaData(page?: number): void {
@@ -131,62 +140,6 @@ export class RidesService {
     this.remoteDbService.endBatch(apiRide.ride.id);
   }
 
-  // Logic to refesh perf data with leaderboards
-
-  refreshPerformanceData(): void {
-    const segmentsToRefresh: number[] = [];
-
-    this.segmentService.getRequiringRefresh().subscribe(
-      (perfData: ISegPerformance[]) => {
-        this.incrementCount(calls.numDbReadsDone);
-        perfData.forEach((segPerformance: ISegPerformance) => {
-          if (
-            segPerformance.requires_refresh === true &&
-            !segmentsToRefresh.includes(segPerformance.segment_id)
-          ) {
-            segmentsToRefresh.push(segPerformance.segment_id);
-
-            this.stravaService
-              .getLeaderboard(segPerformance.segment_id)
-              .then((leaderboard: ISegPerfPreUpdate) => {
-                if (leaderboard !== null)
-                  this.applyLeaderboardToSegPerformance(segPerformance, leaderboard);
-              });
-          }
-        });
-      },
-      (error: FirebaseError) => {
-        const msg = `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`;
-        this.propagateMsg("databaseMsg", msg);
-        console.log(msg);
-      }
-    );
-  }
-
-  private applyLeaderboardToSegPerformance(
-    segPerformance: ISegPerformance,
-    leaderboard: ISegPerfPreUpdate
-  ): void {
-    this.remoteDbService.update(
-      collections.segmentPerformance,
-      [segPerformance.segment_id, segPerformance.athlete_id],
-      leaderboard
-    );
-  }
-
-  // Database access
-
-  clearLocalDb() {
-    this.incrementCount(calls.numDbWritesMade);
-    this.localDbService.clear().then(res => {
-      this.rideService.clearLocalDb();
-      this.segmentService.clearLocalDb();
-      this.incrementCount(calls.numDbWritesDone);
-    });
-  }
-
-  //API to database mapping
-
   private mapSegEffortToSegPerf(segEffort: ISegEffort, athleteId: number): ISegPerfPreSave {
     const segPerf: ISegPerfPreSave = {
       requires_refresh: true,
@@ -207,5 +160,37 @@ export class RidesService {
       }
     };
     return JSON.parse(JSON.stringify(segPerf));
+  }
+
+  // Logic to refesh perf data with leaderboards
+
+  refreshPerformanceData(): void {
+    const segmentsToRefresh: number[] = [];
+
+    this.segmentService.getRequiringRefresh().subscribe(
+      (perfData: ISegPerformance[]) => {
+        this.incrementCount(calls.numDbReadsDone);
+        perfData.forEach((segPerformance: ISegPerformance) => {
+          if (
+            segPerformance.requires_refresh === true &&
+            !segmentsToRefresh.includes(segPerformance.segment_id)
+          ) {
+            segmentsToRefresh.push(segPerformance.segment_id);
+
+            this.stravaService
+              .getLeaderboard(segPerformance.segment_id)
+              .then((leaderboard: ISegPerfPreUpdate) => {
+                if (leaderboard !== null)
+                  this.segmentService.updateWithLeaderboard(segPerformance, leaderboard);
+              });
+          }
+        });
+      },
+      (error: FirebaseError) => {
+        const msg = `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`;
+        this.propagateMsg("databaseMsg", msg);
+        console.log(msg);
+      }
+    );
   }
 }
