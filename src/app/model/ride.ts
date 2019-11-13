@@ -16,6 +16,10 @@ export class Rides {
     return this._rides;
   }
 
+  getRide(rideId: number) {
+    return this.rides.find(ride => ride.id === rideId);
+  }
+
   getRideAvgSpeedByYear(): IChartPoint[] {
     const calcWeightedAvgSpeed = (
       currentDistance: number,

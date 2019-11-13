@@ -1,0 +1,9 @@
+<p-tabView>
+  <p-tabPanel header="All Cycles" leftIcon="fa fa-list">
+    <app-rides-list (rideSelected)="rideSelected($event)" [rides]="rides"></app-rides-list>
+  </p-tabPanel>
+
+  <p-tabPanel *ngFor="let ride of rideDrillDowns" header="{{ ride.date }}" [closable]="true" leftIcon="fa fa-bicycle">
+    <app-seg-efforts-list [inputRideId]="ride.id"></app-seg-efforts-list>
+  </p-tabPanel>
+</p-tabView>

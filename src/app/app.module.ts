@@ -33,6 +33,7 @@ import { SegPerfListComponent } from "./components/seg-perf-list/seg-perf-list.c
 import { NavBarComponent } from "./components/nav-bar/nav-bar.component";
 import { SegEffortsListComponent } from "./components/seg-efforts-list/seg-efforts-list.component";
 import { SegPerfChartComponent } from "./components/seg-perf-chart/seg-perf-chart.component";
+import { RidesListContainerComponent } from './components/rides-list-container/rides-list-container.component';
 
 const dbConfig: DBConfig = {
   name: "MyDb",
@@ -58,7 +59,8 @@ const dbConfig: DBConfig = {
     SegPerfListComponent,
     NavBarComponent,
     SegEffortsListComponent,
-    SegPerfChartComponent
+    SegPerfChartComponent,
+    RidesListContainerComponent
   ],
   imports: [
     BrowserModule,
