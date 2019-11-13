@@ -21,6 +21,7 @@ export class SegmentService {
   ) {
     this.incrementCount = new BehaviorSubject(null);
     this.propagateMsg = new BehaviorSubject(null);
+    localDbService.currentStore = "ridecache";
   }
 
   clearLocalDb() {
@@ -28,7 +29,7 @@ export class SegmentService {
   }
 
   getRideSegments(rideId: number): Promise<SegmentEffort[]> {
-    return this.getSegPerformances().then((segPerfs: SegmentPerformances) => {
+    return this.get().then((segPerfs: SegmentPerformances) => {
       return this.localDbService.getByIndex(localDb.key, rideId).then(seFromLocalDb => {
         if (seFromLocalDb === undefined)
           return this.getRideSegmentsFromDb(rideId).then((seFromDb: ISegEffort[]) =>
@@ -49,10 +50,10 @@ export class SegmentService {
     });
   }
 
-  getSegPerformances(): Promise<SegmentPerformances> {
+  get(): Promise<SegmentPerformances> {
     if (this.segPerfs !== null) return new Promise(resolve => resolve(this.segPerfs));
     return this.localDbService.getByIndex(localDb.key, localDb.segPerfs).then(segPerfs => {
-      if (segPerfs === undefined) return this.getSegPerformancesFromDb();
+      if (segPerfs === undefined) return this.getFromDb();
       else {
         const segPerfsToReturn: SegmentPerformances = new SegmentPerformances(
           JSON.parse(segPerfs.value)._segmentPerformances,
@@ -64,7 +65,7 @@ export class SegmentService {
     });
   }
 
-  private getSegPerformancesFromDb(): Promise<SegmentPerformances> {
+  private getFromDb(): Promise<SegmentPerformances> {
     return this.firestore
       .collection(collections.segmentPerformance, (ref: CollectionReference) =>
         ref
@@ -77,13 +78,11 @@ export class SegmentService {
       .toPromise()
       .then(res => {
         const segPerfsNumEntries = res.docs.map(segPerf => segPerf.data() as ISegPerformance);
-        return this.getSegPerformancesRiddenMostFromDb(segPerfsNumEntries);
+        return this.getRiddenMostFromDb(segPerfsNumEntries);
       });
   }
 
-  private getSegPerformancesRiddenMostFromDb(
-    segPerfsNumEntries: ISegPerformance[]
-  ): Promise<SegmentPerformances> {
+  private getRiddenMostFromDb(segPerfsNumEntries: ISegPerformance[]): Promise<SegmentPerformances> {
     return this.firestore
       .collection(collections.segmentPerformance, (ref: CollectionReference) =>
         ref
@@ -107,7 +106,7 @@ export class SegmentService {
       });
   }
 
-  getPerformanceDataToRefresh(): Observable<any> {
+  getRequiringRefresh(): Observable<any> {
     this.incrementCount.next("numDbReadsMade");
     return this.firestore
       .collection(collections.segmentPerformance, (ref: CollectionReference) =>

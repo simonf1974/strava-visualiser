@@ -16,7 +16,7 @@ export class SegPerfListComponent implements OnInit {
   constructor(private segmentService: SegmentService) {}
 
   ngOnInit() {
-    this.segmentService.getSegPerformances().then((segPerfs: SegmentPerformances) => {
+    this.segmentService.get().then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
       this.cols = [
         { field: "segment_name_with_link", header: "Name" },

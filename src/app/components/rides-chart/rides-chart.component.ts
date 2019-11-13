@@ -1,8 +1,6 @@
 import { Component, OnInit, Input } from "@angular/core";
-import { ChartModule } from "primeng/chart";
-import { RidesService } from "src/app/shared/rides.service";
-import { IRide } from "../../model/model";
 import { Rides } from "src/app/model/ride";
+import { RideService } from "src/app/shared/ride.service";
 
 @Component({
   selector: "app-rides-chart",
@@ -14,7 +12,7 @@ export class RidesChartComponent implements OnInit {
   options: any;
   rides: Rides;
 
-  constructor(private ridesService: RidesService) {}
+  constructor(private rideService: RideService) {}
 
   ngOnInit() {
     this.getRides();
@@ -87,7 +85,7 @@ export class RidesChartComponent implements OnInit {
   }
 
   getRides() {
-    this.ridesService.getRides().then((rides: Rides) => {
+    this.rideService.get().then((rides: Rides) => {
       this.rides = rides;
 
       const distAggData = this.rides.getRidesByMonth();

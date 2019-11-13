@@ -1,9 +1,8 @@
 import { Component, OnInit } from "@angular/core";
-import { RidesService } from "src/app/shared/rides.service";
 import { Rides, Ride } from "../../model/ride";
 import { FilterUtils } from "primeng/api";
 import { Router } from "@angular/router";
-import { faCoffee } from "@fortawesome/free-solid-svg-icons";
+import { RideService } from "src/app/shared/ride.service";
 
 @Component({
   selector: "app-rides-list",
@@ -17,10 +16,10 @@ export class RidesListComponent implements OnInit {
   rideDrillDowns: Ride[] = [];
   activeIndex = 0;
 
-  constructor(private ridesService: RidesService, private router: Router) {}
+  constructor(private rideService: RideService, private router: Router) {}
 
   ngOnInit() {
-    this.ridesService.getRides().then((rides: Rides) => {
+    this.rideService.get().then((rides: Rides) => {
       this.rides = rides;
       this.cols = [
         { field: "nameWithLink", header: "Name" },

@@ -96,7 +96,7 @@ export class SegPerfChartComponent implements OnInit {
   }
 
   getSegPerfs() {
-    this.segmentService.getSegPerformances().then((segPerfs: SegmentPerformances) => {
+    this.segmentService.get().then((segPerfs: SegmentPerformances) => {
       this.segPerfs = segPerfs;
 
       this.data = {
