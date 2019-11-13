@@ -116,7 +116,7 @@ export class RidesService {
       this.remoteDbService.addToBatch(
         collections.segmentPerformance,
         [segEffort.segment_id, apiRide.ride.athlete_id],
-        this.mergeSegEffortAndSegPerf(segEffort, apiRide.ride.athlete_id),
+        this.mapSegEffortToSegPerf(segEffort, apiRide.ride.athlete_id),
         apiRide.ride.id
       );
     });
@@ -187,7 +187,7 @@ export class RidesService {
 
   //API to database mapping
 
-  private mergeSegEffortAndSegPerf(segEffort: ISegEffort, athleteId: number): ISegPerfPreSave {
+  private mapSegEffortToSegPerf(segEffort: ISegEffort, athleteId: number): ISegPerfPreSave {
     const segPerf: ISegPerfPreSave = {
       requires_refresh: true,
       athlete_id: athleteId,
