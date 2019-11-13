@@ -3,15 +3,28 @@ export const collections = {
   rides: "rides",
   rideSegEfforts: "ride_seg_efforts"
 };
+
 export const localDb = {
   key: "key",
   rides: "rides",
   segPerfs: "segPerfs"
 };
+
 export const columns = {
   requiresRefresh: "requires_refresh",
   numTimesRidden: "num_times_ridden",
   numEntries: "num_entries"
+};
+
+export const calls = {
+  numStravaApiCallsMade: "numStravaApiCallsMade",
+  numStravaApiCallsDone: "numStravaApiCallsDone",
+  numDbReadsMade: "numDbReadsMade",
+  numDbReadsDone: "numDbReadsDone",
+  numDbWritesMade: "numDbWritesMade",
+  numDbWritesDone: "numDbWritesDone",
+  httpDetails: "httpDetails",
+  databaseMsg: "databaseMsg"
 };
 
 export interface ICalls {

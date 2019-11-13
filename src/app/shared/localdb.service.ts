@@ -1,5 +1,6 @@
 import { Injectable } from "@angular/core";
 import { NgxIndexedDBService } from "ngx-indexed-db";
+import { localDb } from "../model/model";
 
 @Injectable({
   providedIn: "root"
@@ -10,7 +11,7 @@ export class LocaldbService {
   }
 
   get(key: string | number): Promise<any> {
-    return this.localDbService.getByIndex("key", key);
+    return this.localDbService.getByIndex(localDb.key, key);
   }
 
   add(key: string | number, value: string): Promise<any> {

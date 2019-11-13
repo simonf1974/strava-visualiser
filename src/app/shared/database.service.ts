@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { AngularFirestore, DocumentSnapshot } from "@angular/fire/firestore";
 import { BehaviorSubject } from "rxjs";
 import { firestore, FirebaseError } from "firebase";
+import { calls } from "../model/model";
 
 @Injectable({
   providedIn: "root"
@@ -21,18 +22,18 @@ export class DatabaseService {
   }
 
   get(collection: string, key: number | number[]): Promise<any> {
-    this.incrementCount.next("numDbReadsMade");
+    this.incrementCount.next(calls.numDbReadsMade);
     return this.firestore
       .collection(collection)
       .doc(this.transformKeyToStore(key))
       .get()
       .toPromise()
       .then((res: DocumentSnapshot<any>) => {
-        this.incrementCount.next("numDbReadsDone");
+        this.incrementCount.next(calls.numDbReadsDone);
         return res.data();
       })
       .catch((res: FirebaseError) => {
-        this.incrementCount.next("numDbReadsDone");
+        this.incrementCount.next(calls.numDbReadsDone);
         this.propagateMsg.next({
           key: "databaseMsg",
           error: `Database error in get by key: Code: ${res.code}, Message: ${res.message}`
@@ -53,7 +54,7 @@ export class DatabaseService {
   }
 
   startBatch(batchId: number): void {
-    this.incrementCount.next("numDbWritesMade");
+    this.incrementCount.next(calls.numDbWritesMade);
     this.batches.set(batchId, [this.firestore.firestore.batch(), 0]);
   }
 
@@ -78,7 +79,7 @@ export class DatabaseService {
     batch
       .commit()
       .then(res => {
-        this.incrementCount.next("numDbWritesDone");
+        this.incrementCount.next(calls.numDbWritesDone);
         this.batches.delete(batchId);
       })
       .catch(res => {
@@ -88,7 +89,7 @@ export class DatabaseService {
   }
 
   update(collection: string, key: number | number[], data): Promise<any> {
-    this.incrementCount.next("numDbWritesMade");
+    this.incrementCount.next(calls.numDbWritesMade);
     console.log(`Updating this seg perf: ${this.transformKeyToStore(key)}`);
     return new Promise<any>((resolve, reject) => {
       this.firestore
@@ -97,7 +98,7 @@ export class DatabaseService {
         .update(data)
         .then(
           res => {
-            this.incrementCount.next("numDbWritesDone");
+            this.incrementCount.next(calls.numDbWritesDone);
           },
           err => reject(err)
         );

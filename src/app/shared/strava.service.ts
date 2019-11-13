@@ -6,7 +6,8 @@ import {
   ISegPerfPreUpdate,
   IRideDetails,
   ISegEffort,
-  ILeaderboardEntry
+  ILeaderboardEntry,
+  calls
 } from "../model/model";
 
 @Injectable({
@@ -91,12 +92,12 @@ export class StravaService {
     const baseUrl = "https://www.strava.com/api/v3/";
     const fullUrl = `${baseUrl}${api}?access_token=${token}${suffix}`;
 
-    this.incrementCount.next("numStravaApiCallsMade");
+    this.incrementCount.next(calls.numStravaApiCallsMade);
     return this.http
       .get(fullUrl, { observe: "response" })
       .toPromise()
       .then((res: HttpResponse<any>) => {
-        this.incrementCount.next("numStravaApiCallsDone");
+        this.incrementCount.next(calls.numStravaApiCallsDone);
         this.propagateMsg.next({
           key: "httpDetails",
           error: `HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}`
@@ -108,14 +109,13 @@ export class StravaService {
         else return null;
       })
       .catch((res: HttpErrorResponse) => {
-        this.incrementCount.next("numStravaApiCallsDone");
+        this.incrementCount.next(calls.numStravaApiCallsDone);
+        const msg = `HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}, Message: ${res.error.message}`;
         this.propagateMsg.next({
           key: "httpDetails",
-          error: `HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}, Message: ${res.error.message}`
+          error: msg
         });
-        console.log(
-          `Strava API error: HTTP Status: ${res.status}, HTTP Status Text ${res.statusText}, Message: ${res.error.message}`
-        );
+        console.log(`Strava API error: ${msg}`);
         if (res.error.message === "Record Not Found") return res.error.message;
         else return null;
       });

@@ -10,7 +10,8 @@ import {
   ISegPerfPreUpdate,
   ISegPerfPreSave,
   ICalls,
-  collections
+  collections,
+  calls
 } from "../model/model";
 import { DatabaseService } from "./database.service";
 import { SegmentService } from "./segment.service";
@@ -122,7 +123,7 @@ export class RidesService {
     });
 
     this.remoteDbService.addToBatch(
-      "ride_seg_efforts",
+      collections.rideSegEfforts,
       rideDetails.ride.id,
       { seg_efforts: rideDetails.segEfforts },
       rideDetails.ride.id
@@ -138,7 +139,7 @@ export class RidesService {
 
     this.segmentService.getRequiringRefresh().subscribe(
       (perfData: ISegPerformance[]) => {
-        this.incrementCount("numDbReadsDone");
+        this.incrementCount(calls.numDbReadsDone);
         perfData.forEach((segPerformance: ISegPerformance) => {
           if (
             segPerformance.requires_refresh === true &&
@@ -156,13 +157,9 @@ export class RidesService {
         });
       },
       (error: FirebaseError) => {
-        this.propagateMsg(
-          "databaseMsg",
-          `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`
-        );
-        console.log(
-          `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`
-        );
+        const msg = `Database error in get performance data: Code: ${error.code}, Message: ${error.message}`;
+        this.propagateMsg("databaseMsg", msg);
+        console.log(msg);
       }
     );
   }
@@ -181,11 +178,11 @@ export class RidesService {
   // Database access
 
   clearLocalDb() {
-    this.incrementCount("numDbWritesMade");
+    this.incrementCount(calls.numDbWritesMade);
     this.localDbService.clear().then(res => {
       this.rideService.clearLocalDb();
       this.segmentService.clearLocalDb();
-      this.incrementCount("numDbWritesDone");
+      this.incrementCount(calls.numDbWritesDone);
     });
   }
 

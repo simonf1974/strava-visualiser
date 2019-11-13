@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Rides } from "../model/ride";
-import { IRide } from "../model/model";
+import { IRide, localDb, collections } from "../model/model";
 import { AngularFirestore } from "@angular/fire/firestore";
 import { BehaviorSubject } from "rxjs";
 import { LocaldbService } from "./localdb.service";
@@ -24,7 +24,7 @@ export class RideService {
 
   get(): Promise<Rides> {
     if (this.rides !== null) return new Promise(resolve => resolve(this.rides));
-    return this.localDbService.get("rides").then(rides => {
+    return this.localDbService.get(localDb.rides).then(rides => {
       if (rides === undefined) return this.getFromDb();
       else {
         const ridesToReturn: Rides = new Rides(JSON.parse(rides.value)._rides);
@@ -36,13 +36,12 @@ export class RideService {
 
   private getFromDb(): Promise<Rides> {
     return this.firestore
-      .collection("rides", ref => ref.limit(5000))
+      .collection(collections.rides, ref => ref.limit(5000))
       .get()
       .toPromise()
       .then(res => {
-        console.log("got rides from db");
         const rides = new Rides(res.docs.map(ride => ride.data() as IRide));
-        this.localDbService.add("rides", JSON.stringify(rides));
+        this.localDbService.add(localDb.rides, JSON.stringify(rides));
         this.rides = rides;
         return rides;
       });
