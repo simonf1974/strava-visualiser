@@ -1,16 +1,15 @@
-import { async, ComponentFixture, TestBed } from '@angular/core/testing';
+import { async, ComponentFixture, TestBed } from "@angular/core/testing";
 
-import { FirestoreCrudComponent } from './firestore-crud.component';
+import { FirestoreCrudComponent } from "./firestore-crud.component";
 
-describe('FirestoreCrudComponent', () => {
+describe("FirestoreCrudComponent", () => {
   let component: FirestoreCrudComponent;
   let fixture: ComponentFixture<FirestoreCrudComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ FirestoreCrudComponent ]
-    })
-    .compileComponents();
+      declarations: [FirestoreCrudComponent]
+    }).compileComponents();
   }));
 
   beforeEach(() => {
@@ -19,7 +18,7 @@ describe('FirestoreCrudComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
+  it("should create", () => {
     expect(component).toBeTruthy();
   });
 });

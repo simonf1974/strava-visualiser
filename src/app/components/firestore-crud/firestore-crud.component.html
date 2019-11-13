@@ -1,15 +1,7 @@
-<!-- <h3 class="mt-3">Scrape Strava Data</h3> -->
-
 <p-toolbar>
   <div class="d-flex justify-content-center m-2">
     <p-button class="mr-3" (click)="scrapeStravaData()" label="Persist new Strava Rides"></p-button>
-
-    <p-button
-      class="mr-3"
-      (click)="refreshPerformanceData()"
-      label="Refresh Performance Data"
-    ></p-button>
-
+    <p-button class="mr-3" (click)="refreshPerformanceData()" label="Refresh Performance Data"></p-button>
     <p-button (click)="clearLocalDb()" label="Clear Local DB"></p-button>
   </div>
 
@@ -17,34 +9,21 @@
     <div class="row">
       <div class="card-deck">
         <div class="card  p-3 m-3">
-          <img
-            src="assets/images/strava-icon-orange.jpg"
-            class="card-img-top mb-2 progress-img"
-            alt="..."
-          />
-
+          <img src="assets/images/strava-icon-orange.jpg" class="card-img-top mb-2 progress-img" alt="..." />
           <h5 class="card-title">API Calls</h5>
           <h6 class="card-subtitle mb-2 text-muted">{{ apiCallsMessage }}</h6>
           <p-progressBar [value]="apiCallsProgress" unit="%"></p-progressBar>
         </div>
 
         <div class="card  p-3 m-3">
-          <img
-            src="assets/images/cloud-firestore-icon.png"
-            class="card-img-top mb-2 progress-img"
-            alt="..."
-          />
+          <img src="assets/images/cloud-firestore-icon.png" class="card-img-top mb-2 progress-img" alt="..." />
           <h5 class="card-title">DB Reads</h5>
           <h6 class="card-subtitle mb-2 text-muted">{{ dbReadsMessage }}</h6>
           <p-progressBar [value]="dbReadsProgress" unit="%"></p-progressBar>
         </div>
 
         <div class="card  p-3 m-3">
-          <img
-            src="assets/images/cloud-firestore-icon.png"
-            class="card-img-top mb-2 progress-img"
-            alt="..."
-          />
+          <img src="assets/images/cloud-firestore-icon.png" class="card-img-top mb-2 progress-img" alt="..." />
           <h5 class="card-title">DB Writes</h5>
           <h6 class="card-subtitle mb-2 text-muted">{{ dbWritesMessage }}</h6>
           <p-progressBar [value]="dbWritesProgress" unit="%"></p-progressBar>
@@ -53,9 +32,6 @@
     </div>
   </div>
 </p-toolbar>
-
-<!-- <p>{{ calls["httpDetails"] }}</p>
-<p>{{ calls["databaseMsg"] }}</p> -->
 
 <h3 class="mt-4">Explanation of steps</h3>
 <h6 class=" mb-2 text-muted">
@@ -69,12 +45,7 @@
       <div class="row">
         <div class="card-deck">
           <div class="card  p-3 m-3">
-            <img
-              src="assets/images/strava-bike-landscape.png"
-              class="card-img-top mb-2"
-              alt="..."
-            />
-
+            <img src="assets/images/strava-bike-landscape.png" class="card-img-top mb-2" alt="..." />
             <h5 class="card-title">Step 1 (Strava API)</h5>
             <h6 class="card-subtitle mb-2 text-muted">Get list of rides from Strava API</h6>
             <p class="card-text">
@@ -82,17 +53,12 @@
               activity IDs. This returns information in pages (max 200 per page) and must be called
               multiple times to get all activities.
             </p>
-            <a
-              href="https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities"
-              target="_blank"
-              class="card-link"
-              >All Activities API</a
-            >
+            <a href="https://developers.strava.com/docs/reference/#api-Activities-getLoggedInAthleteActivities"
+              target="_blank" class="card-link">All Activities API</a>
           </div>
 
           <div class="card  p-3 m-3">
             <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
-
             <h5 class="card-title">Step 2 (DB Read)</h5>
             <h6 class="card-subtitle mb-2 text-muted">Check if ride is in the Firestore DB</h6>
             <p class="card-text">
@@ -103,29 +69,19 @@
           </div>
 
           <div class="card  p-3 m-3">
-            <img
-              src="assets/images/strava-bike-landscape.png"
-              class="card-img-top mb-2"
-              alt="..."
-            />
-
+            <img src="assets/images/strava-bike-landscape.png" class="card-img-top mb-2" alt="..." />
             <h5 class="card-title">Step 3 (Strava API)</h5>
             <h6 class="card-subtitle mb-2 text-muted">Get Ride details for unsaved rides</h6>
             <p class="card-text">
               For each ride that had not been previously saved in the Firestore DB, get ride details
               (including all segments ridden) from the Strava API.
             </p>
-            <a
-              href="https://developers.strava.com/docs/reference/#api-Activities-getActivityById"
-              target="_blank"
-              class="card-link"
-              >Activity API</a
-            >
+            <a href="https://developers.strava.com/docs/reference/#api-Activities-getActivityById" target="_blank"
+              class="card-link">Activity API</a>
           </div>
 
           <div class="card p-3 m-3">
             <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
-
             <h5 class="card-title">Step 4 (DB Batch Write)</h5>
             <h6 class="card-subtitle mb-2 text-muted">Save ride and ride segments</h6>
             <p class="card-text">
@@ -144,7 +100,6 @@
         <div class="card-deck">
           <div class="card p-3 m-3">
             <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
-
             <h5 class="card-title">Step 1 (DB Read)</h5>
             <h6 class="card-subtitle mb-2 text-muted">Get segments requiring refresh</h6>
             <p class="card-text">
@@ -153,12 +108,7 @@
           </div>
 
           <div class="card m-3 p-3">
-            <img
-              src="assets/images/strava-bike-landscape.png"
-              class="card-img-top mb-2"
-              alt="..."
-            />
-
+            <img src="assets/images/strava-bike-landscape.png" class="card-img-top mb-2" alt="..." />
             <h5 class="card-title">Step 2 (Strava API)</h5>
             <h6 class="card-subtitle mb-2 text-muted">
               Get leaderboard and number of times ridden
@@ -169,24 +119,15 @@
               times the segment has been ridden.
             </p>
             <div>
-              <a
-                href="https://developers.strava.com/docs/reference/#api-Segments-getLeaderboardBySegmentId"
-                target="_blank"
-                class="card-link"
-                >Leaderboard API</a
-              >
-              <a
-                href="https://developers.strava.com/docs/reference/#api-Segments-getSegmentById"
-                target="_blank"
-                class="card-link"
-                >Segment API</a
-              >
+              <a href="https://developers.strava.com/docs/reference/#api-Segments-getLeaderboardBySegmentId"
+                target="_blank" class="card-link">Leaderboard API</a>
+              <a href="https://developers.strava.com/docs/reference/#api-Segments-getSegmentById" target="_blank"
+                class="card-link">Segment API</a>
             </div>
           </div>
 
           <div class="card m-3 p-3">
             <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
-
             <h5 class="card-title">Step 2 (DB Write)</h5>
             <h6 class="card-subtitle mb-2 text-muted">Save save segment performance data</h6>
             <p class="card-text">
@@ -205,7 +146,6 @@
         <div class="card-deck">
           <div class="card p-3 m-3">
             <img src="assets/images/indexeddb.jpg" class="card-img-top mb-2" alt="..." />
-
             <h5 class="card-title">Data Reads from Local DB</h5>
             <h6 class="card-subtitle mb-2 text-muted">All data reads check local DB</h6>
             <p class="card-text">
@@ -219,7 +159,6 @@
 
           <div class="card p-3 m-3">
             <img src="assets/images/cloud-firestore.png" class="card-img-top mb-2" alt="..." />
-
             <h5 class="card-title">Data Reads From Firestore</h5>
             <h6 class="card-subtitle mb-2 text-muted">
               Data reads fall back to Firestore
@@ -232,7 +171,6 @@
 
           <div class="card p-3 m-3">
             <img src="assets/images/indexeddb.jpg" class="card-img-top mb-2" alt="..." />
-
             <h5 class="card-title">Clearing the local DB</h5>
             <h6 class="card-subtitle mb-2 text-muted">
               Ability to clear down the local DB

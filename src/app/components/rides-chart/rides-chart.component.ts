@@ -1,8 +1,6 @@
-import { Component, OnInit, Input } from "@angular/core";
-import { ChartModule } from "primeng/chart";
-import { RidesService } from "src/app/shared/rides.service";
-import { IRide } from "../../model/model";
+import { Component, OnInit } from "@angular/core";
 import { Rides } from "src/app/model/ride";
+import { RideService } from "src/app/shared/ride.service";
 
 @Component({
   selector: "app-rides-chart",
@@ -14,7 +12,7 @@ export class RidesChartComponent implements OnInit {
   options: any;
   rides: Rides;
 
-  constructor(private ridesService: RidesService) {}
+  constructor(private rideService: RideService) {}
 
   ngOnInit() {
     this.getRides();
@@ -30,16 +28,6 @@ export class RidesChartComponent implements OnInit {
       },
       legend: {
         position: "top"
-      },
-      onClick: function(c, i) {
-        // const e = i[0];
-        // var y_value = this.data.datasets[e._datasetIndex].data[e._index];
-        // console.log(y_value);
-        // console.log(c);
-        // console.log(i);
-        // console.log(this.data);
-        // console.log(this.data.datasets[e._datasetIndex]);
-        // window.open(`https://www.strava.com/segments/${y_value.segmentId}`, "_blank");
       },
       scales: {
         yAxes: [
@@ -87,12 +75,10 @@ export class RidesChartComponent implements OnInit {
   }
 
   getRides() {
-    this.ridesService.getRides().then((rides: Rides) => {
+    this.rideService.get().then((rides: Rides) => {
       this.rides = rides;
-
       const distAggData = this.rides.getRidesByMonth();
       const avgSpeedByYear = this.rides.getRideAvgSpeedByYear();
-
       this.data = {
         datasets: [
           {

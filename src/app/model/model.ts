@@ -1,3 +1,43 @@
+export const collections = {
+  segmentPerformance: "segment_performance",
+  rides: "rides",
+  rideSegEfforts: "ride_seg_efforts"
+};
+
+export const localDb = {
+  key: "key",
+  rides: "rides",
+  segPerfs: "segPerfs"
+};
+
+export const columns = {
+  requiresRefresh: "requires_refresh",
+  numTimesRidden: "num_times_ridden",
+  numEntries: "num_entries"
+};
+
+export const calls = {
+  numStravaApiCallsMade: "numStravaApiCallsMade",
+  numStravaApiCallsDone: "numStravaApiCallsDone",
+  numDbReadsMade: "numDbReadsMade",
+  numDbReadsDone: "numDbReadsDone",
+  numDbWritesMade: "numDbWritesMade",
+  numDbWritesDone: "numDbWritesDone",
+  httpDetails: "httpDetails",
+  databaseMsg: "databaseMsg"
+};
+
+export interface ICalls {
+  numStravaApiCallsMade: number;
+  numStravaApiCallsDone: number;
+  numDbReadsMade: number;
+  numDbReadsDone: number;
+  numDbWritesMade: number;
+  numDbWritesDone: number;
+  httpDetails: string;
+  databaseMsg: string;
+}
+
 export interface IRideDetails {
   ride: IRide;
   segEfforts: ISegEffort[];
@@ -114,5 +154,4 @@ export interface IChartPoint {
   y: number;
   r?: number;
   segmentId?: number;
-  date?: string;
 }
