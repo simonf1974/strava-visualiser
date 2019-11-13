@@ -43,7 +43,7 @@ export class SegmentService {
   }
 
   private getRideSegmentsFromDb(rideId: number): Promise<ISegEffort[]> {
-    return this.remoteDbService.getByKey(collections.rideSegEfforts, rideId).then(segEfforts => {
+    return this.remoteDbService.get(collections.rideSegEfforts, rideId).then(segEfforts => {
       this.localDbService.add(rideId, JSON.stringify(segEfforts));
       return segEfforts.seg_efforts;
     });

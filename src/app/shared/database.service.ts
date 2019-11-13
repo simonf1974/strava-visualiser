@@ -20,7 +20,7 @@ export class DatabaseService {
     this.propagateMsg = new BehaviorSubject(null);
   }
 
-  getByKey(collection: string, key: number | number[]): Promise<any> {
+  get(collection: string, key: number | number[]): Promise<any> {
     this.incrementCount.next("numDbReadsMade");
     return this.firestore
       .collection(collection)
@@ -57,7 +57,7 @@ export class DatabaseService {
     this.batches.set(batchId, [this.firestore.firestore.batch(), 0]);
   }
 
-  addDataToBatch(collection: string, key: number | number[], data, batchId: number): void {
+  addToBatch(collection: string, key: number | number[], data, batchId: number): void {
     const itemRef = this.firestore.collection(collection).doc(this.transformKeyToStore(key)).ref;
 
     const batch = this.batches.get(batchId)[0];
@@ -87,7 +87,7 @@ export class DatabaseService {
       });
   }
 
-  updateData(collection: string, key: number | number[], data): Promise<any> {
+  update(collection: string, key: number | number[], data): Promise<any> {
     this.incrementCount.next("numDbWritesMade");
     console.log(`Updating this seg perf: ${this.transformKeyToStore(key)}`);
     return new Promise<any>((resolve, reject) => {
