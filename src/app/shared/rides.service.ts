@@ -88,10 +88,10 @@ export class RidesService {
   }
 
   private processRide(rideId: number): void {
-    this.remoteDbService.get(collections.rides, rideId).then((rideFromDb: IRide) => {
-      if (rideFromDb !== null && rideFromDb === undefined) {
-        this.stravaService.getRide(rideId).then((rideDetails: IRideDetails) => {
-          if (rideDetails !== null) this.saveRideDetails(rideDetails);
+    this.remoteDbService.get(collections.rides, rideId).then((dbRide: IRide) => {
+      if (dbRide !== null && dbRide === undefined) {
+        this.stravaService.getRide(rideId).then((apiRide: IRideDetails) => {
+          if (apiRide !== null) this.saveRideDetails(apiRide);
           else
             console.log("Ride details are null, I'm guessing there was an error getting the ride");
         });
@@ -99,37 +99,36 @@ export class RidesService {
     });
   }
 
-  private saveRideDetails(rideDetails: IRideDetails): void {
+  private saveRideDetails(apiRide: IRideDetails): void {
     console.log(
-      `About to do a batch for ride ${rideDetails.ride.id} with ${rideDetails.segEfforts.length} segments`
+      `About to do a batch for ride ${apiRide.ride.id} with ${apiRide.segEfforts.length} segments`
     );
-    this.remoteDbService.startBatch(rideDetails.ride.id);
+    this.remoteDbService.startBatch(apiRide.ride.id);
 
     this.remoteDbService.addToBatch(
       collections.rides,
-      rideDetails.ride.id,
-      rideDetails.ride,
-      rideDetails.ride.id
+      apiRide.ride.id,
+      apiRide.ride,
+      apiRide.ride.id
     );
 
-    rideDetails.segEfforts.forEach((segEffort: ISegEffort) => {
+    apiRide.segEfforts.forEach((segEffort: ISegEffort) => {
       this.remoteDbService.addToBatch(
         collections.segmentPerformance,
-        [segEffort.segment_id, rideDetails.ride.athlete_id],
-        this.mergeSegEffortAndSegPerf(segEffort, rideDetails.ride.athlete_id),
-
-        rideDetails.ride.id
+        [segEffort.segment_id, apiRide.ride.athlete_id],
+        this.mergeSegEffortAndSegPerf(segEffort, apiRide.ride.athlete_id),
+        apiRide.ride.id
       );
     });
 
     this.remoteDbService.addToBatch(
       collections.rideSegEfforts,
-      rideDetails.ride.id,
-      { seg_efforts: rideDetails.segEfforts },
-      rideDetails.ride.id
+      apiRide.ride.id,
+      { seg_efforts: apiRide.segEfforts },
+      apiRide.ride.id
     );
 
-    this.remoteDbService.endBatch(rideDetails.ride.id);
+    this.remoteDbService.endBatch(apiRide.ride.id);
   }
 
   // Logic to refesh perf data with leaderboards
