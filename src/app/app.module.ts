@@ -17,6 +17,7 @@ import { ToolbarModule } from "primeng/toolbar";
 import { AccordionModule } from "primeng/accordion";
 import { TabViewModule } from "primeng/tabview";
 import { FontAwesomeModule } from "@fortawesome/angular-fontawesome";
+import { ProgressSpinnerModule } from "primeng/progressspinner";
 
 import { NgxIndexedDBModule, DBConfig } from "ngx-indexed-db";
 
@@ -85,7 +86,8 @@ const dbConfig: DBConfig = {
     NgxIndexedDBModule.forRoot(dbConfig),
     TabViewModule,
     FontAwesomeModule,
-    LayoutModule
+    LayoutModule,
+    ProgressSpinnerModule
   ],
   providers: [],
   bootstrap: [AppComponent]

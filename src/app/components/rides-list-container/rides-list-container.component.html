@@ -1,4 +1,8 @@
-<p-tabView>
+<div class="prog" *ngIf="!isReady">
+  <p-progressSpinner></p-progressSpinner>
+</div>
+
+<p-tabView *ngIf="isReady">
   <p-tabPanel header="All Cycles" leftIcon="fa fa-list">
     <app-rides-list (rideSelected)="rideSelected($event)" [rides]="rides"></app-rides-list>
   </p-tabPanel>

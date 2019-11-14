@@ -11,12 +11,14 @@ import { Rides, Ride } from "src/app/model/ride";
 export class RidesListContainerComponent implements OnInit {
   rides: Rides;
   rideDrillDowns: Ride[] = [];
+  isReady = false;
 
   constructor(private rideService: RideService) {}
 
   ngOnInit() {
     this.rideService.get().then((rides: Rides) => {
       this.rides = rides;
+      this.isReady = true;
     });
   }
 

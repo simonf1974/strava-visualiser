@@ -12,6 +12,7 @@ export class SegPerfListComponent implements OnInit {
   segPerfs: SegmentPerformances;
   cols: any[];
   selectedColumns: any[];
+  isReady = false;
 
   constructor(private segmentService: SegmentService) {}
 
@@ -37,6 +38,7 @@ export class SegPerfListComponent implements OnInit {
         if (value === undefined || value === null) return false;
         return parseInt(filter) < value;
       };
+      this.isReady = true;
     });
   }
 

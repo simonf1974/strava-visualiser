@@ -11,6 +11,7 @@ export class SegPerfChartComponent implements OnInit {
   data: any;
   options: any;
   segPerfs: SegmentPerformances;
+  isReady = false;
 
   constructor(private segmentService: SegmentService) {}
 
@@ -102,6 +103,7 @@ export class SegPerfChartComponent implements OnInit {
           }
         ]
       };
+      this.isReady = true;
     });
   }
 }

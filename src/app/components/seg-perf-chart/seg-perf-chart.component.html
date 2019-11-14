@@ -1,1 +1,4 @@
-<p-chart type="bubble" [data]="data" [options]="options" height="85vh"></p-chart>
+<div class="prog" *ngIf="!isReady">
+  <p-progressSpinner></p-progressSpinner>
+</div>
+<p-chart type="bubble" [data]="data" [options]="options" height="85vh" *ngIf="isReady"></p-chart>

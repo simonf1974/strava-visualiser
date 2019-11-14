@@ -1,5 +1,9 @@
+<div class="prog" *ngIf="!isReady">
+  <p-progressSpinner></p-progressSpinner>
+</div>
+
 <p-table #dt [columns]="selectedColumns" [value]="segPerfs.segmentPerformances" sortMode="multiple" [paginator]="true"
-  [rows]="15" [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding">
+  [rows]="15" [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding" *ngIf="isReady">
   <ng-template pTemplate="caption">
     <div class="caption-container">
       <div style="text-align:left">
