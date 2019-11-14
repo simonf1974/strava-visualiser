@@ -150,8 +150,4 @@ export class Ride {
 
     return timeString;
   }
-
-  get nameWithLink() {
-    return `<span><a href='https://www.strava.com/activities/${this.id}' target='_blank'>${this.name}</a></span>`;
-  }
 }

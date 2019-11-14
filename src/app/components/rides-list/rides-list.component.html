@@ -2,29 +2,14 @@
   [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding" dataKey="id">
   <ng-template pTemplate="caption">
     There are {{ rides.rides.length }} rides
-    <!-- <div class="caption-container">
-      <div style="text-align:left">
-        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
-          selectedItemsLabel="{0} columns selected" [style]="{ minWidth: '200px' }" defaultLabel="Choose Columns">
-        </p-multiSelect>
-      </div>
-      <div style="text-align: right">
-        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
-        <input type="text" pInputText size="50" placeholder="Global Filter"
-          (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto" />
-      </div>
-    </div> -->
   </ng-template>
-
-  <!-- <ng-template pTemplate="summary"> There are {{ rides.rides.length }} rides </ng-template> -->
 
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
-      <th style="width: 3em"></th>
-      <th style="width:4em"></th>
+      <th [attr.colspan]=2 [attr.rowspan]=2 style="width: 7em"></th>
       <th class="table-header" *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn
         pReorderableColumn [ngClass]="{
-              'wide-column1': col.field === 'nameWithLink',
+              'wide-column1': col.field === 'name',
               'wide-column2': col.field === 'date'
             }">
         {{ col.header }}
@@ -33,8 +18,6 @@
     </tr>
 
     <tr>
-      <th></th>
-      <th></th>
       <th *ngFor="let col of columns" [ngSwitch]="getColFilterType(col.field)">
         <input *ngSwitchCase="'equals'" pInputText type="text"
           (input)="dt.filter($event.target.value, col.field, 'contains')" />
@@ -63,6 +46,10 @@
   <ng-template pTemplate="rowexpansion" let-ride let-columns="columns">
     <tr>
       <td [attr.colspan]="columns.length + 2">
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Ride on Strava website: </b> <a href="https://www.strava.com/activities/{{ ride.id}}"
+            target="_blank">Link</a>
+        </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
           <b>Distance:</b> {{ ride.distance }} km
         </div>

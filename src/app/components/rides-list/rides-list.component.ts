@@ -19,7 +19,7 @@ export class RidesListComponent implements OnInit {
 
   ngOnInit() {
     this.cols = [
-      { field: "nameWithLink", header: "Name" },
+      { field: "name", header: "Name" },
       { field: "date", header: "Date" },
       { field: "distance", header: "Dist (km)" },
       { field: "movingTimeFormatted", header: "Moving Time" },
@@ -68,7 +68,7 @@ export class RidesListComponent implements OnInit {
   }
 
   getColFilterType(col: string) {
-    if (col === "nameWithLink" || col === "date") return "equals";
+    if (col === "name" || col === "date") return "equals";
     else return "greaterThan";
   }
 }
