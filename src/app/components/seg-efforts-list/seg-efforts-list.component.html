@@ -1,5 +1,5 @@
 <p-table #dt [columns]="selectedColumns" [value]="segEfforts" sortMode="multiple" [paginator]="true" [rows]="15"
-  [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding">
+  [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding" dataKey="id">
   <ng-template pTemplate="caption">
     <div class="caption-container">
       <div style="text-align:left">
@@ -19,6 +19,7 @@
 
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
+      <th [attr.rowspan]=2 style="width: 3em"></th>
       <th class="table-header" *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn
         pReorderableColumn [ngClass]="{
           'wide-column1': col.field === 'segment_name_with_link' || col.field === 'people_below',
@@ -38,11 +39,57 @@
       </th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-segEffort let-columns="columns">
+  <ng-template pTemplate="body" let-segEffort let-expanded="expanded" let-columns="columns">
     <tr>
+      <td>
+        <a href="#" [pRowToggler]="segEffort">
+          <i [ngClass]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+        </a>
+      </td>
       <td *ngFor="let col of columns" class="ui-resizable-column">
         <span innerHTML="{{ segEffort[col.field] }}"></span>
       </td>
     </tr>
   </ng-template>
+
+
+
+
+  <ng-template pTemplate="rowexpansion" let-ride let-columns="columns">
+    <tr>
+      <td [attr.colspan]="columns.length + 1">
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Start Time:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Distance:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Average Speed:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Elevation gain:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Average Watts:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Average Temp:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Calories:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Achievements:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>PR Count:</b>
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Kudos:</b>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+
 </p-table>

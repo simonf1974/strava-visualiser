@@ -22,7 +22,7 @@ export class SegEffortsListComponent implements OnInit {
       this.cols = [
         { field: "segment_name_with_link", header: "Name" },
         { field: "segment_city", header: "City" },
-        { field: "startTime", header: "Start Date" },
+        { field: "startTime", header: "Start Time" },
         { field: "segment_distance", header: "Distance (km)" },
         { field: "segment_average_grade", header: "Avg Grade (%)" },
         { field: "elapsedTime", header: "Time" },
