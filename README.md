@@ -19,16 +19,16 @@ Finally, I used the PrimeNG Angular component library and Chart.js to facilitate
 ## Screenshots
 
 ### Rides Chart
-![Screenshot](readme-img1.png)
+![Screenshot](readme-img/ride-chart.png)
 
 ### Segments Chart
-![Screenshot](readme-img1.png)
+![Screenshot](readme-img/segment-chart.png)
 
 ### Rides List
-![Screenshot](readme-img1.png)
+![Screenshot](readme-img/ride-list.png)
 
 ### Rides List Drill Down
-![Screenshot](readme-img1.png)
+![Screenshot](readme-img/ride-list-drill-down.png)
 
 ### Segments List
-![Screenshot](readme-img1.png)
+![Screenshot](readme-img/segment-list.png)
