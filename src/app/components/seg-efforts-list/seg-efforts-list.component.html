@@ -1,21 +1,8 @@
 <p-table #dt [columns]="selectedColumns" [value]="segEfforts" sortMode="multiple" [paginator]="true" [rows]="15"
   [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding" dataKey="id">
   <ng-template pTemplate="caption">
-    <div class="caption-container">
-      <div style="text-align:left">
-        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
-          selectedItemsLabel="{0} columns selected" [style]="{ minWidth: '200px' }" defaultLabel="Choose Columns">
-        </p-multiSelect>
-      </div>
-      <div style="text-align: right">
-        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
-        <input type="text" pInputText size="50" placeholder="Global Filter"
-          (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto" />
-      </div>
-    </div>
+    There are {{ segEfforts.length }} segments
   </ng-template>
-
-  <ng-template pTemplate="summary"> There are {{ segEfforts.length }} segments </ng-template>
 
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
@@ -55,38 +42,44 @@
 
 
 
-  <ng-template pTemplate="rowexpansion" let-ride let-columns="columns">
+  <ng-template pTemplate="rowexpansion" let-segEffort let-columns="columns">
     <tr>
       <td [attr.colspan]="columns.length + 1">
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Start Time:</b>
+          <b>People Above:</b> {{ segEffort.people_above }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Distance:</b>
+          <b>People Below:</b> {{ segEffort.people_below }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Average Speed:</b>
+          <b>Start Time:</b> {{ segEffort.startTime }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Elevation gain:</b>
+          <b>Distance:</b> {{ segEffort.segment_distance }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Average Watts:</b>
+          <b>Avg Grade:</b> {{ segEffort.segment_average_grade }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Average Temp:</b>
+          <b>Time:</b> {{ segEffort.elapsedTime }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Calories:</b>
+          <b>Behind PR:</b> {{ segEffort.secondsBehindPr }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Achievements:</b>
+          <b>Times Ridden:</b> {{ segEffort.num_times_ridden }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>PR Count:</b>
+          <b>Rank:</b> {{ segEffort.rank }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Kudos:</b>
+          <b>PR Time:</b> {{ segEffort.pr_elapsed_time }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Top Time:</b> {{ segEffort.top_elapsed_time }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>PR Behind Top:</b> {{ segEffort.secondsPrBehindTop }}
         </div>
       </td>
     </tr>

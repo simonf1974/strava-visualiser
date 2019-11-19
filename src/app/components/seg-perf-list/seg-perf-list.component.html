@@ -3,28 +3,15 @@
 </div>
 
 <p-table #dt [columns]="selectedColumns" [value]="segPerfs.segmentPerformances" sortMode="multiple" [paginator]="true"
-  [rows]="15" [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding" *ngIf="isReady">
+  [rows]="15" [resizableColumns]="true" [reorderableColumns]="true" class="tdLessPadding" *ngIf="isReady"
+  dataKey="segment_id">
   <ng-template pTemplate="caption">
-    <div class="caption-container">
-      <div style="text-align:left">
-        <p-multiSelect [options]="cols" [(ngModel)]="selectedColumns" optionLabel="header"
-          selectedItemsLabel="{0} columns selected" [style]="{ minWidth: '200px' }" defaultLabel="Choose Columns">
-        </p-multiSelect>
-      </div>
-      <div style="text-align: right">
-        <i class="fa fa-search" style="margin:4px 4px 0 0"></i>
-        <input type="text" pInputText size="50" placeholder="Global Filter"
-          (input)="dt.filterGlobal($event.target.value, 'contains')" style="width:auto" />
-      </div>
-    </div>
-  </ng-template>
-
-  <ng-template pTemplate="summary">
     There are {{ segPerfs.segmentPerformances.length }} segments
   </ng-template>
 
   <ng-template pTemplate="header" let-columns class="table-header-container">
     <tr>
+      <th [attr.rowspan]=2 style="width: 3em"></th>
       <th class="table-header" *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn
         pReorderableColumn [ngClass]="{
           'wide-column1':
@@ -47,10 +34,61 @@
       </th>
     </tr>
   </ng-template>
-  <ng-template pTemplate="body" let-perfs let-columns="columns">
+  <ng-template pTemplate="body" let-perf let-expanded="expanded" let-columns="columns">
     <tr>
+      <td>
+        <a href="#" [pRowToggler]="perf">
+          <i [ngClass]="expanded ? 'pi pi-chevron-down' : 'pi pi-chevron-right'"></i>
+        </a>
+      </td>
       <td *ngFor="let col of columns" class="ui-resizable-column">
-        <span innerHTML="{{ perfs[col.field] }}"></span>
+        <span innerHTML="{{ perf[col.field] }}"></span>
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="rowexpansion" let-perf let-columns="columns">
+    <tr>
+      <td [attr.colspan]="columns.length + 1">
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>People Above:</b> {{ perf.people_below }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>People Below:</b> {{ perf.people_below }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Segment on Strava Website:</b> {{ perf.people_above }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Start Time:</b> {{ perf.startTime }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Distance:</b> {{ perf.segment_distance }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Avg Grade:</b> {{ perf.segment_average_grade }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Time:</b> {{ perf.elapsedTime }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Behind PR:</b> {{ perf.secondsBehindPr }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Times Ridden:</b> {{ perf.num_times_ridden }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Rank:</b> {{ perf.rank }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>PR Time:</b> {{ perf.pr_elapsed_time }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>Top Time:</b> {{ perf.top_elapsed_time }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>PR Behind Top:</b> {{ perf.secondsPrBehindTop }}
+        </div>
       </td>
     </tr>
   </ng-template>
