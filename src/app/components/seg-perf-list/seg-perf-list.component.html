@@ -15,10 +15,10 @@
       <th class="table-header" *ngFor="let col of columns" [pSortableColumn]="col.field" pResizableColumn
         pReorderableColumn [ngClass]="{
           'wide-column1':
-            col.field === 'segment_name_with_link' ||
             col.field === 'people_below' ||
             col.field === 'people_above',
-          'wide-column2': col.field === 'segment_city'
+          'wide-column2': col.field === 'segment_name',
+          'wide-column3': col.field === 'segment_city'
         }">
         {{ col.header }}
         <p-sortIcon [field]="col.field"></p-sortIcon>
@@ -51,40 +51,35 @@
     <tr>
       <td [attr.colspan]="columns.length + 1">
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>People Above:</b> {{ perf.people_below }}
+          <b>Rank:</b> {{ perf.rank }}
+        </div>
+        <div class="ui-g-12 ui-md-6 ui-lg-3">
+          <b>People Above:</b> {{ perf.people_above }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
           <b>People Below:</b> {{ perf.people_below }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Segment on Strava Website:</b> {{ perf.people_above }}
+          <b>Segment on Strava Website: </b> <a href="https://www.strava.com/segments/${{perf.segment_id)}"
+          target="_blank">Link</a>
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Start Time:</b> {{ perf.startTime }}
+          <b>City:</b> {{ perf.segment_city }}
         </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Distance:</b> {{ perf.segment_distance }}
+        <div class=" ui-g-12 ui-md-6 ui-lg-3">
+            <b>Distance:</b> {{ perf.segment_distance }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
           <b>Avg Grade:</b> {{ perf.segment_average_grade }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Time:</b> {{ perf.elapsedTime }}
-        </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Behind PR:</b> {{ perf.secondsBehindPr }}
-        </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-3">
           <b>Times Ridden:</b> {{ perf.num_times_ridden }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Rank:</b> {{ perf.rank }}
+          <b>PR Time:</b> {{ perf.prElapsedTime }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>PR Time:</b> {{ perf.pr_elapsed_time }}
-        </div>
-        <div class="ui-g-12 ui-md-6 ui-lg-3">
-          <b>Top Time:</b> {{ perf.top_elapsed_time }}
+          <b>Top Time:</b> {{ perf.topElapsedTime }}
         </div>
         <div class="ui-g-12 ui-md-6 ui-lg-3">
           <b>PR Behind Top:</b> {{ perf.secondsPrBehindTop }}

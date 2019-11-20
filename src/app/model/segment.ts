@@ -79,6 +79,10 @@ export class SegmentPerformance {
   entries: ILeaderboardEntry[];
   segment: ISegment;
 
+  get segment_name() {
+    return this.segment.name;
+  }
+
   get segment_name_with_link() {
     return `<span><a href='https://www.strava.com/segments/${this.segment.id}' target='_blank'>${this.segment.name}</a></span>`;
   }
